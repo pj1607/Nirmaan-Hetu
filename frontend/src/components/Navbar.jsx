@@ -2,7 +2,6 @@ import React from 'react';
 import {
   AppBar,
   Toolbar,
-  Typography,
   Button,
   IconButton,
   Box,
@@ -10,74 +9,102 @@ import {
 } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import LoginIcon from '@mui/icons-material/Login';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx';
 import logo from '../assets/logo.png';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const { isLoggedIn, role, logout } = useAuth();
 
-  const menuItems = [
-    { label: 'Home', path: '/', icon: <HomeIcon /> },
-    { label: 'Login', path: '/login', icon: <LoginIcon /> },
-  ];
+  let menuItems = [];
+  if (!isLoggedIn) {
+    menuItems = [
+      { label: 'Home', path: '/', icon: <HomeIcon /> },
+      { label: 'Login', path: '/login', icon: <LoginIcon /> },
+    ];
+  } else {
+    if (role === 'owner') {
+      menuItems = [
+        { label: 'Dashboard', path: '/dashboard/owner', icon: <DashboardIcon /> },
+      ];
+    } else if (role === 'builder') {
+      menuItems = [
+        { label: 'Dashboard', path: '/dashboard/builder', icon: <DashboardIcon /> },
+      ];
+    }
+    menuItems.push({ label: 'Logout', action: logout }); 
+  }
 
   return (
-    <>
-      <AppBar
-        position="fixed"
-        elevation={0}
+    <AppBar
+      position="fixed"
+      elevation={0}
+      sx={{
+        bgcolor: 'transparent',
+        px: { xs: 2, md: 4 },
+        py: 1,
+      }}
+    >
+      <Toolbar
         sx={{
-          bgcolor: 'transparent',
-          px: { xs: 2, md: 4 },
+          background: '#ffffffff',
+          borderRadius: '40px',
+          width: '100%',
+          maxWidth: '1500px',
+          mx: 'auto',
           py: 1,
+          px: 2,
+          display: 'flex',
+          justifyContent: 'space-between',
         }}
       >
-        <Toolbar
+        {/* Logo */}
+        <Box
           sx={{
-            background: '#ffffffff',
-
-            borderRadius: '40px',
-            width: '100%',
-            maxWidth: '1500px',
-            mx: 'auto',
-            py: 1,
-            px: 2,
             display: 'flex',
-            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 1.5,
+            cursor: 'pointer',
+            transition: 'transform 0.3s ease-in-out',
+            '&:hover': {
+              transform: 'scale(1.08)',
+            },
           }}
+          onClick={() => navigate('/')}
         >
-          {/* Logo */}
-        {/* Logo and Title */}
-<Box
-  sx={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: 1.5,
-    cursor: 'pointer',
-    transition: 'transform 0.3s ease-in-out',
-    '&:hover': {
-      transform: 'scale(1.08)',
-    },
-  }}
-  onClick={() => navigate('/')}
->
-  {/* Logo Image */}
-  <Box
-    component="img"
-    src={logo}
-    alt="Logo"
-    sx={{
-      height: 42,
-      filter: 'invert(1) contrast(150%)',
-      transition: 'filter 0.3s ease-in-out',
-    }}
-  />
-</Box>
+          <Box
+            component="img"
+            src={logo}
+            alt="Logo"
+            sx={{
+              height: 42,
+              filter: 'invert(1) contrast(150%)',
+              transition: 'filter 0.3s ease-in-out',
+            }}
+          />
+        </Box>
 
-
-          {/* Desktop Menu */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2, alignItems: 'center' }}>
-            {menuItems.map((item) => (
+        {/* Desktop Menu */}
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2, alignItems: 'center' }}>
+          {menuItems.map((item) =>
+            item.action ? (
+              <Button
+                key={item.label}
+                onClick={item.action}
+                sx={{
+                  color: '#000000ff',
+                  fontWeight: 600,
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                  transition: 'transform 0.3s ease-in-out',
+                  '&:hover': { color: '#FF7A5A', transform: 'scale(1.08)' },
+                }}
+              >
+                {item.label}
+              </Button>
+            ) : (
               <Button
                 key={item.label}
                 onClick={() => navigate(item.path)}
@@ -85,39 +112,51 @@ const Navbar = () => {
                   color: '#000000ff',
                   fontWeight: 600,
                   textTransform: 'none',
-                  fontSize: '1rem', 
-                   transition: 'transform 0.3s ease-in-out',
-                  '&:hover': {
-                    color: '#FF7A5A',
-                  transform: 'scale(1.08)'
-                },
+                  fontSize: '1rem',
+                  transition: 'transform 0.3s ease-in-out',
+                  '&:hover': { color: '#FF7A5A', transform: 'scale(1.08)' },
                 }}
               >
                 {item.label}
               </Button>
-            ))}
-          </Box>
+            )
+          )}
+        </Box>
 
-          {/* Mobile Icons */}
-          <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1 }}>
-            {menuItems.map((item) => (
+        {/* Mobile Icons */}
+        <Box sx={{ display: { xs: 'flex', md: 'none' }, gap: 1 }}>
+          {menuItems.map((item) =>
+            item.action ? (
+              <Tooltip title={item.label} key={item.label}>
+                <IconButton
+                  onClick={item.action}
+                  sx={{
+                    color: '#000000ff',
+                    transition: 'transform 0.3s ease-in-out',
+                    '&:hover': { color: '#FF7A5A', transform: 'scale(1.08)' },
+                  }}
+                >
+                  {item.icon || <LoginIcon />}
+                </IconButton>
+              </Tooltip>
+            ) : (
               <Tooltip title={item.label} key={item.label}>
                 <IconButton
                   onClick={() => navigate(item.path)}
                   sx={{
                     color: '#000000ff',
                     transition: 'transform 0.3s ease-in-out',
-                    '&:hover': { color: '#FF7A5A',transform: 'scale(1.08)' },
+                    '&:hover': { color: '#FF7A5A', transform: 'scale(1.08)' },
                   }}
                 >
                   {item.icon}
                 </IconButton>
               </Tooltip>
-            ))}
-          </Box>
-        </Toolbar>
-      </AppBar>
-    </>
+            )
+          )}
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
 

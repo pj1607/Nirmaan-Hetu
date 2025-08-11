@@ -3,44 +3,54 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
 
 import Home from './pages/home/Home';
-import Login from './pages/login/LoginPage.jsx'
+import Login from './pages/login/LoginPage.jsx';
 import Navbar from './components/Navbar.jsx';
+import { ToastContainer } from 'react-toastify';
 
 import OwnerDashboard from './pages/dashboard/owner/DashboardO.jsx';
 import BuilderDashboard from './pages/dashboard/builder/DashboardB.jsx';
+import OAuthSuccess from './pages/OAuthSuccess.jsx';
 
 const App = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isLoggedIn, role, loading } = useAuth();
 
-  const RequireAuth = ({ role, children }) => {
-    if (!isAuthenticated) return <Navigate to="/login" />;
-    if (role && user?.role !== role) return <Navigate to="/" />;
+  if (loading) return null; 
+
+  const RequireAuth = ({ requiredRole, children }) => {
+    if (!isLoggedIn) return <Navigate to="/login" replace />;
+    if (requiredRole && role !== requiredRole) return <Navigate to="/" replace />;
+    return children;
+  };
+
+  const PublicRoute = ({ children }) => {
+    if (isLoggedIn) {
+      if (role === 'owner') return <Navigate to="/dashboard/owner" replace />;
+      if (role === 'builder') return <Navigate to="/dashboard/builder" replace />;
+    }
     return children;
   };
 
   return (
     <>
+      <ToastContainer />
       <Navbar />
       <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
+          <Route path="/oauth-success" element={<OAuthSuccess />} />
+        <Route path="/" element={<PublicRoute><Home /></PublicRoute>} />
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
 
-        {/* Owner Routes */}
         <Route
           path="/dashboard/owner"
           element={
-            <RequireAuth role="owner">
+            <RequireAuth requiredRole="owner">
               <OwnerDashboard />
             </RequireAuth>
           }
         />
-
-        {/* Builder Routes */}
         <Route
           path="/dashboard/builder"
           element={
-            <RequireAuth role="builder">
+            <RequireAuth requiredRole="builder">
               <BuilderDashboard />
             </RequireAuth>
           }
