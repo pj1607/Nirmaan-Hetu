@@ -275,7 +275,7 @@ login(token, username, role);
               }}
             >
               {loading ? (
-                <CircularProgress size={26} sx={{ color: '#1c0f0f' }} />
+                <CircularProgress size={26} sx={{ color: '#ffffffff' }} />
               ) : (
                 'Register'
               )}
