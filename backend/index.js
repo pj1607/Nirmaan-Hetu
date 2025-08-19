@@ -14,7 +14,7 @@ connectDB();
 
 const allowedOrigins = [
   'http://localhost:5173',
-  "https://nirmaan-hetu.vercel.app"
+  'https://nirmaan-hetu.vercel.app'
 ];
 
 app.use(cors({
