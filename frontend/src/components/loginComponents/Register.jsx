@@ -38,59 +38,66 @@ const Register = () => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [btnState, setBtnState] = useState('default'); // ✅ small change
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const trimmedUserName = form.username.trim();
-  const trimmedEmail = form.email.trim();
-  const trimmedPassword = form.password.trim();
-  const trimmedConfirmPassword = form.confirmPassword.trim();
+    const trimmedUserName = form.username.trim();
+    const trimmedEmail = form.email.trim();
+    const trimmedPassword = form.password.trim();
+    const trimmedConfirmPassword = form.confirmPassword.trim();
 
-  if (trimmedPassword !== trimmedConfirmPassword) {
-    toast.error('Passwords do not match.');
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    const res = await axios.post(`${API}/auth/register`, {
-      username: trimmedUserName,
-      email: trimmedEmail,
-      password: trimmedPassword,
-      confirmPassword: trimmedConfirmPassword,
-      role: form.role,
-    });
-  const { token, username, role } = res.data.data;
-login(token, username, role);
-
-
-    toast.success(`Welcome, ${username}!`);
-    if (role === 'owner') {
-      navigate('/dashboard/owner', { replace: true });
-    } else if (role === 'builder') {
-      navigate('/dashboard/builder', { replace: true });
-    } else {
-      navigate('/', { replace: true });
+    if (!trimmedUserName || !trimmedEmail || !trimmedPassword || !trimmedConfirmPassword) {
+      toast.error('Please fill in all fields.');
+      return;
     }
 
-  } catch (error) {
-    const message =
-      error.response?.data?.message ||
-      error.response?.data?.error ||
-      'Something went wrong';
-    toast.error(message);
-  } finally {
-    setLoading(false);
-  }
-};
+    if (trimmedPassword !== trimmedConfirmPassword) {
+      toast.error('Passwords do not match.');
+      return;
+    }
 
+    try {
+      setBtnState('loading'); // ✅ small change
+      const res = await axios.post(`${API}/auth/register`, {
+        username: trimmedUserName,
+        email: trimmedEmail,
+        password: trimmedPassword,
+        confirmPassword: trimmedConfirmPassword,
+        role: form.role,
+      });
+
+      const { token, username, role } = res.data.data;
+      login(token, username, role);
+      setBtnState('success'); // ✅ small change
+      toast.success(`Welcome, ${username}!`);
+
+      setTimeout(() => {
+        if (role === 'owner') navigate('/dashboard/owner', { replace: true });
+        else if (role === 'builder') navigate('/dashboard/builder', { replace: true });
+        else navigate('/', { replace: true });
+      }, 500);
+
+    } catch (error) {
+      setBtnState('error'); // ✅ small change
+      const message =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        'Something went wrong';
+      toast.error(message);
+      setTimeout(() => setBtnState('default'), 1500);
+    }
+  };
+
+  const renderBtnContent = () => {
+    if (btnState === 'loading') return <CircularProgress size={26} sx={{ color: '#fefefeff' }} />;
+    if (btnState === 'success') return '✔ Registration Successful';
+    if (btnState === 'error') return '⚠ Registration Failed';
+    return 'Register';
+  };
 
   return (
     <Container maxWidth="sm">
@@ -121,34 +128,15 @@ login(token, username, role);
           <Stack spacing={3}>
             <FormControl component="fieldset">
               <FormLabel sx={{ color: '#d8c7b2', mb: 1 }}>Register as</FormLabel>
-              <RadioGroup
-                row
-                name="role"
-                value={form.role}
-                onChange={handleChange}
-              >
+              <RadioGroup row name="role" value={form.role} onChange={handleChange}>
                 <FormControlLabel
                   value="owner"
-                  control={
-                    <Radio
-                      sx={{
-                        color: '#FF7A5A',
-                        '&.Mui-checked': { color: '#FF7A5A' },
-                      }}
-                    />
-                  }
+                  control={<Radio sx={{ color: '#FF7A5A', '&.Mui-checked': { color: '#FF7A5A' } }} />}
                   label="Owner"
                 />
                 <FormControlLabel
                   value="builder"
-                  control={
-                    <Radio
-                      sx={{
-                        color: '#FF7A5A',
-                        '&.Mui-checked': { color: '#FF7A5A' },
-                      }}
-                    />
-                  }
+                  control={<Radio sx={{ color: '#FF7A5A', '&.Mui-checked': { color: '#FF7A5A' } }} />}
                   label="Builder"
                 />
               </RadioGroup>
@@ -204,11 +192,7 @@ login(token, username, role);
                 sx: { color: '#f1e0d6' },
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowPassword(!showPassword)}
-                      edge="end"
-                      sx={{ color: '#f1e0d6' }}
-                    >
+                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" sx={{ color: '#f1e0d6' }}>
                       {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
@@ -236,11 +220,7 @@ login(token, username, role);
                 sx: { color: '#f1e0d6' },
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      edge="end"
-                      sx={{ color: '#f1e0d6' }}
-                    >
+                    <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end" sx={{ color: '#f1e0d6' }}>
                       {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
@@ -255,30 +235,24 @@ login(token, username, role);
                 },
               }}
             />
-
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              disabled={loading}
+              disabled={btnState === 'loading'}
               sx={{
                 py: 1.2,
                 fontWeight: 'bold',
                 fontSize: '1rem',
-                bgcolor: '#FF7A5A',
+                bgcolor: btnState === 'error' ? '#f87171' : btnState === 'success' ? '#34d399' : '#FF7A5A',
                 color: '#1c0f0f',
                 textTransform: 'none',
-                '&:hover': {
-                  bgcolor: '#e7643f',
-                  transform: 'scale(1.03)',
-                },
+                '&:hover': { bgcolor: btnState === 'error' ? '#f87171' : btnState === 'success' ? '#34d399' : '#e7643f', transform: 'scale(1.03)' },
               }}
             >
-              {loading ? (
-                <CircularProgress size={26} sx={{ color: '#ffffffff' }} />
-              ) : (
-                'Register'
-              )}
+              {btnState === 'loading' ? <CircularProgress size={26} sx={{ color: '#fefefeff' }} /> :
+               btnState === 'success' ? '✔ Registration Successful' :
+               btnState === 'error' ? '⚠ Registration Failed' : 'Register'}
             </Button>
           </Stack>
         </form>
