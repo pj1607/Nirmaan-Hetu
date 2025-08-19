@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import { toast } from 'react-toastify'; 
 
 const AuthContext = createContext();
 const API = import.meta.env.VITE_API_URL;
@@ -61,6 +62,8 @@ export const AuthProvider = ({ children }) => {
     setIsLoggedIn(false);
     setUsername('');
     setRole('');
+
+    toast.success('Logout successful!');
   };
 
   return (
