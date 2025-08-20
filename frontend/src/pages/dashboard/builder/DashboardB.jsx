@@ -166,7 +166,8 @@ const DashboardB = () => {
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", position: "relative" }}>
-      <Sidebar />
+     <Sidebar role="builder" />
+
 
       <Box
         component="main"
