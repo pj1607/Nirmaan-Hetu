@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Modal,
   Box,
@@ -13,7 +13,57 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { Close } from "@mui/icons-material";
 
-const MotionBox = motion.create(Box);
+const MotionBox = motion(Box);
+const Field = React.memo(function Field({
+  label,
+  name,
+  type = "text",
+  multiline = false,
+  rows,
+  value,
+  onChange,
+}) {
+  return (
+    <TextField
+      label={label}
+      name={name}
+      type={type}
+      fullWidth
+      multiline={multiline}
+      rows={rows}
+      value={value}
+      onChange={onChange}
+      variant="outlined"
+      size="medium"
+    />
+  );
+});
+
+const ImagePreviewGrid = React.memo(function ImagePreviewGrid({ urls }) {
+  if (!urls.length) return null;
+  return (
+    <Stack direction="row" spacing={1} flexWrap="wrap">
+      {urls.map((url, i) => (
+        <Box
+          key={url + i}
+          component="img"
+          src={url}
+          alt={`work-${i}`}
+          sx={{
+            width: 72,
+            height: 72,
+            borderRadius: 2,
+            objectFit: "cover",
+            border: "1px solid #eee",
+            display: "block",
+          }}
+          loading="lazy"
+          decoding="async"
+        />
+      ))}
+    </Stack>
+  );
+});
 
 const PortfolioModal = ({ open, onClose }) => {
   const [formData, setFormData] = useState({
@@ -23,23 +73,48 @@ const PortfolioModal = ({ open, onClose }) => {
     address: "",
     pastWork: "",
     description: "",
-    images: [],
+    images: [], // File[]
   });
 
-  const handleChange = (e) => {
+  // Keep a ref of generated object URLs so we can revoke them reliably
+  const objectUrlsRef = useRef([]); // string[]
+
+  // Generate URLs only when images change
+  const previewUrls = useMemo(() => {
+    // Cleanup previously generated URLs
+    objectUrlsRef.current.forEach((u) => URL.revokeObjectURL(u));
+    objectUrlsRef.current = formData.images.map((f) => URL.createObjectURL(f));
+    return objectUrlsRef.current;
+  }, [formData.images]);
+
+  // Revoke on unmount/modal close
+  useEffect(() => {
+    return () => {
+      objectUrlsRef.current.forEach((u) => URL.revokeObjectURL(u));
+      objectUrlsRef.current = [];
+    };
+  }, []);
+
+  // Stable handlers (avoid re-creating functions on every render)
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  }, []);
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    setFormData({ ...formData, images: [...formData.images, ...files] });
-  };
+  const handleImageUpload = useCallback((e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    // Append; keep reference equality for other fields
+    setFormData((prev) => ({ ...prev, images: prev.images.concat(files) }));
+    // reset the input so re-uploading the same files works
+    e.target.value = "";
+  }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = useCallback(() => {
+    // In real app, send formData to backend here
     console.log("Portfolio Data:", formData);
-    onClose();
-  };
+    onClose?.();
+  }, [formData, onClose]);
 
   return (
     <AnimatePresence>
@@ -50,10 +125,9 @@ const PortfolioModal = ({ open, onClose }) => {
           closeAfterTransition
           BackdropComponent={Backdrop}
           BackdropProps={{
-            timeout: 200,
+            timeout: 120,
             sx: {
-              backdropFilter: "blur(6px)",
-              backgroundColor: "rgba(0,0,0,0.4)",
+              backgroundColor: "rgba(0,0,0,0.45)",
             },
           }}
           sx={{
@@ -72,13 +146,14 @@ const PortfolioModal = ({ open, onClose }) => {
               borderTopLeftRadius: 16,
               borderTopRightRadius: 16,
               width: "100%",
-              maxWidth: 600,
+              maxWidth: 640,
               mx: "auto",
-              p: 3,
+              p: { xs: 2, sm: 3 },
               maxHeight: "85vh",
               overflowY: "auto",
               position: "relative",
               boxShadow: "0 -4px 20px rgba(0,0,0,0.2)",
+              willChange: "transform", // hint GPU
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -88,13 +163,17 @@ const PortfolioModal = ({ open, onClose }) => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                mb: 2,
+                mb: 1,
+                position: "sticky",
+                top: 0,
+                bgcolor: "#eed9d9ff",
+                zIndex: 1,
               }}
             >
-              <Typography variant="h6" fontWeight="600" color="black">
+              <Typography variant="h6" fontWeight={700} color="black">
                 Add Portfolio
               </Typography>
-              <IconButton onClick={onClose}>
+              <IconButton onClick={onClose} aria-label="Close">
                 <Close />
               </IconButton>
             </Box>
@@ -102,50 +181,44 @@ const PortfolioModal = ({ open, onClose }) => {
 
             {/* Form */}
             <Stack spacing={2}>
-              <TextField
+              <Field
                 label="Builder Name"
                 name="name"
-                fullWidth
                 value={formData.name}
                 onChange={handleChange}
               />
-              <TextField
+              <Field
                 label="Company Name"
                 name="company"
-                fullWidth
                 value={formData.company}
                 onChange={handleChange}
               />
-              <TextField
+              <Field
                 label="Years of Experience"
                 name="experience"
                 type="number"
-                fullWidth
                 value={formData.experience}
                 onChange={handleChange}
               />
-              <TextField
+              <Field
                 label="Company Address"
                 name="address"
-                fullWidth
                 multiline
                 rows={2}
                 value={formData.address}
                 onChange={handleChange}
               />
-              <TextField
+              <Field
                 label="List of Past Work"
                 name="pastWork"
-                fullWidth
                 multiline
                 rows={3}
                 value={formData.pastWork}
                 onChange={handleChange}
               />
-              <TextField
+              <Field
                 label="Description / Skills"
                 name="description"
-                fullWidth
                 multiline
                 rows={3}
                 value={formData.description}
@@ -164,24 +237,8 @@ const PortfolioModal = ({ open, onClose }) => {
                 />
               </Button>
 
-              {/* Preview */}
-              <Stack direction="row" spacing={1} flexWrap="wrap">
-                {formData.images.map((img, i) => (
-                  <Box
-                    key={i}
-                    component="img"
-                    src={URL.createObjectURL(img)}
-                    alt="work"
-                    sx={{
-                      width: 70,
-                      height: 70,
-                      borderRadius: 2,
-                      objectFit: "cover",
-                      border: "1px solid #eee",
-                    }}
-                  />
-                ))}
-              </Stack>
+              {/* Preview (isolated & memoized) */}
+              <ImagePreviewGrid urls={previewUrls} />
 
               <Button
                 variant="contained"
