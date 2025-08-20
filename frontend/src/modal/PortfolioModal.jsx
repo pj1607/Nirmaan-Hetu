@@ -11,9 +11,11 @@ import {
   Backdrop,
 } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
-import { Close } from "@mui/icons-material";
+import { Close, Delete } from "@mui/icons-material";
 
 const MotionBox = motion(Box);
+
+
 const Field = React.memo(function Field({
   label,
   name,
@@ -39,27 +41,51 @@ const Field = React.memo(function Field({
   );
 });
 
-const ImagePreviewGrid = React.memo(function ImagePreviewGrid({ urls }) {
+
+const ImagePreviewGrid = React.memo(function ImagePreviewGrid({ urls, onRemove }) {
   if (!urls.length) return null;
   return (
     <Stack direction="row" spacing={1} flexWrap="wrap">
       {urls.map((url, i) => (
         <Box
-          key={url + i}
-          component="img"
-          src={url}
-          alt={`work-${i}`}
+          key={url}
           sx={{
+            position: "relative",
             width: 72,
             height: 72,
             borderRadius: 2,
-            objectFit: "cover",
+            overflow: "hidden",
             border: "1px solid #eee",
-            display: "block",
           }}
-          loading="lazy"
-          decoding="async"
-        />
+        >
+          <Box
+            component="img"
+            src={url}
+            alt={`work-${i}`}
+            sx={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              display: "block",
+            }}
+            loading="lazy"
+            decoding="async"
+          />
+          <IconButton
+            size="small"
+            onClick={() => onRemove(i)}
+            sx={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              bgcolor: "rgba(0,0,0,0.5)",
+              color: "white",
+              "&:hover": { bgcolor: "rgba(0,0,0,0.7)" },
+            }}
+          >
+            <Delete fontSize="small" />
+          </IconButton>
+        </Box>
       ))}
     </Stack>
   );
@@ -76,18 +102,16 @@ const PortfolioModal = ({ open, onClose }) => {
     images: [], // File[]
   });
 
-  // Keep a ref of generated object URLs so we can revoke them reliably
-  const objectUrlsRef = useRef([]); // string[]
+  const objectUrlsRef = useRef([]); 
 
-  // Generate URLs only when images change
+
   const previewUrls = useMemo(() => {
-    // Cleanup previously generated URLs
     objectUrlsRef.current.forEach((u) => URL.revokeObjectURL(u));
     objectUrlsRef.current = formData.images.map((f) => URL.createObjectURL(f));
     return objectUrlsRef.current;
   }, [formData.images]);
 
-  // Revoke on unmount/modal close
+ 
   useEffect(() => {
     return () => {
       objectUrlsRef.current.forEach((u) => URL.revokeObjectURL(u));
@@ -95,7 +119,6 @@ const PortfolioModal = ({ open, onClose }) => {
     };
   }, []);
 
-  // Stable handlers (avoid re-creating functions on every render)
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -104,14 +127,18 @@ const PortfolioModal = ({ open, onClose }) => {
   const handleImageUpload = useCallback((e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
-    // Append; keep reference equality for other fields
-    setFormData((prev) => ({ ...prev, images: prev.images.concat(files) }));
-    // reset the input so re-uploading the same files works
+    setFormData((prev) => ({ ...prev, images: [...prev.images, ...files] }));
     e.target.value = "";
   }, []);
 
+  const handleRemoveImage = useCallback((index) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
+  }, []);
+
   const handleSubmit = useCallback(() => {
-    // In real app, send formData to backend here
     console.log("Portfolio Data:", formData);
     onClose?.();
   }, [formData, onClose]);
@@ -126,15 +153,9 @@ const PortfolioModal = ({ open, onClose }) => {
           BackdropComponent={Backdrop}
           BackdropProps={{
             timeout: 120,
-            sx: {
-              backgroundColor: "rgba(0,0,0,0.45)",
-            },
+            sx: { backgroundColor: "rgba(0,0,0,0.45)" },
           }}
-          sx={{
-            display: "flex",
-            alignItems: "flex-end",
-            justifyContent: "center",
-          }}
+          sx={{ display: "flex", alignItems: "flex-end", justifyContent: "center" }}
         >
           <MotionBox
             initial={{ y: "100%", opacity: 0, scale: 0.98 }}
@@ -153,7 +174,6 @@ const PortfolioModal = ({ open, onClose }) => {
               overflowY: "auto",
               position: "relative",
               boxShadow: "0 -4px 20px rgba(0,0,0,0.2)",
-              willChange: "transform", // hint GPU
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -164,9 +184,7 @@ const PortfolioModal = ({ open, onClose }) => {
                 alignItems: "center",
                 justifyContent: "space-between",
                 mb: 1,
-                position: "sticky",
                 top: 0,
-                bgcolor: "#eed9d9ff",
                 zIndex: 1,
               }}
             >
@@ -181,64 +199,21 @@ const PortfolioModal = ({ open, onClose }) => {
 
             {/* Form */}
             <Stack spacing={2}>
-              <Field
-                label="Builder Name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-              />
-              <Field
-                label="Company Name"
-                name="company"
-                value={formData.company}
-                onChange={handleChange}
-              />
-              <Field
-                label="Years of Experience"
-                name="experience"
-                type="number"
-                value={formData.experience}
-                onChange={handleChange}
-              />
-              <Field
-                label="Company Address"
-                name="address"
-                multiline
-                rows={2}
-                value={formData.address}
-                onChange={handleChange}
-              />
-              <Field
-                label="List of Past Work"
-                name="pastWork"
-                multiline
-                rows={3}
-                value={formData.pastWork}
-                onChange={handleChange}
-              />
-              <Field
-                label="Description / Skills"
-                name="description"
-                multiline
-                rows={3}
-                value={formData.description}
-                onChange={handleChange}
-              />
+              <Field label="Builder Name" name="name" value={formData.name} onChange={handleChange} />
+              <Field label="Company Name" name="company" value={formData.company} onChange={handleChange} />
+              <Field label="Years of Experience" name="experience" type="number" value={formData.experience} onChange={handleChange} />
+              <Field label="Company Address" name="address" multiline rows={2} value={formData.address} onChange={handleChange} />
+              <Field label="List of Past Work" name="pastWork" multiline rows={3} value={formData.pastWork} onChange={handleChange} />
+              <Field label="Description / Skills" name="description" multiline rows={3} value={formData.description} onChange={handleChange} />
 
               {/* Upload Images */}
               <Button variant="outlined" component="label">
                 Upload Images
-                <input
-                  type="file"
-                  hidden
-                  multiple
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                />
+                <input type="file" hidden multiple accept="image/*" onChange={handleImageUpload} />
               </Button>
 
-              {/* Preview (isolated & memoized) */}
-              <ImagePreviewGrid urls={previewUrls} />
+              {/* Preview with remove option */}
+              <ImagePreviewGrid urls={previewUrls} onRemove={handleRemoveImage} />
 
               <Button
                 variant="contained"
