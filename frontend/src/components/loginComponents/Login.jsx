@@ -124,7 +124,7 @@ const [btnState, setBtnState] = useState('default');
           <form onSubmit={handleSubmit}>
             <Stack spacing={3}>
               <FormControl component="fieldset">
-                <FormLabel sx={{ color: '#d8c7b2', mb: 1 }}>Login as</FormLabel>
+                <FormLabel sx={{ color: '#d8c7b2', mb: 1 , '&.Mui-focused': { color: '#d8c7b2' },}}>Login as</FormLabel>
                 <RadioGroup row name="role" value={form.role} onChange={handleChange}>
                   <FormControlLabel
                     value="owner"
@@ -150,8 +150,9 @@ const [btnState, setBtnState] = useState('default');
                 InputProps={{ sx: { color: '#f1e0d6' } }}
                 InputLabelProps={{ sx: { color: '#d8c7b2' } }}
                 sx={{
+                  '& label.Mui-focused': { color: '#d8c7b2' }, 
                   '& .MuiOutlinedInput-root': {
-                    '& fieldset': { borderColor: '#a47155' },
+                    // '& fieldset': { borderColor: '#a47155' },
                     '&:hover fieldset': { borderColor: '#FF7A5A' },
                     '&.Mui-focused fieldset': { borderColor: '#FF7A5A' },
                      '& input': {
@@ -188,8 +189,9 @@ const [btnState, setBtnState] = useState('default');
                 }}
                 InputLabelProps={{ sx: { color: '#d8c7b2' } }}
                 sx={{
+                  '& label.Mui-focused': { color: '#d8c7b2' }, 
                   '& .MuiOutlinedInput-root': {
-                    '& fieldset': { borderColor: '#a47155' },
+                    // '& fieldset': { borderColor: '#a47155' },
                     '&:hover fieldset': { borderColor: '#FF7A5A' },
                     '&.Mui-focused fieldset': { borderColor: '#FF7A5A' },
                     
