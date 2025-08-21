@@ -1,4 +1,3 @@
-// Only small changes around the submit button and state
 import React, { useState } from 'react';
 import {
   Box,
@@ -16,7 +15,7 @@ import {
   InputAdornment,
   IconButton
 } from '@mui/material';
-import { motion, AnimatePresence, motionValue, useMotionValue } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -44,14 +43,12 @@ const Login = () => {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-const [btnState, setBtnState] = useState('default'); 
-
+  const [btnState, setBtnState] = useState('default');
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const trimmedEmail = form.email.trim();
     const trimmedPassword = form.password.trim();
     if (!trimmedEmail || !trimmedPassword) {
@@ -98,15 +95,6 @@ const [btnState, setBtnState] = useState('default');
   return (
     <motion.div {...fadeVariant}>
       <Container maxWidth="sm" sx={{ mt: 10 }}>
-        <Box
-          sx={{
-            p: 4,
-            borderRadius: 4,
-            backgroundColor: '#1b1b1bff',
-            color: '#f1e0d6',
-            boxShadow: 5,
-          }}
-        >
           <Typography
             variant="h5"
             sx={{
@@ -124,7 +112,9 @@ const [btnState, setBtnState] = useState('default');
           <form onSubmit={handleSubmit}>
             <Stack spacing={3}>
               <FormControl component="fieldset">
-                <FormLabel sx={{ color: '#d8c7b2', mb: 1 , '&.Mui-focused': { color: '#d8c7b2' },}}>Login as</FormLabel>
+                <FormLabel sx={{ color: '#d8c7b2', mb: 1, '&.Mui-focused': { color: '#d8c7b2' } }}>
+                  Login as
+                </FormLabel>
                 <RadioGroup row name="role" value={form.role} onChange={handleChange}>
                   <FormControlLabel
                     value="owner"
@@ -150,21 +140,19 @@ const [btnState, setBtnState] = useState('default');
                 InputProps={{ sx: { color: '#f1e0d6' } }}
                 InputLabelProps={{ sx: { color: '#d8c7b2' } }}
                 sx={{
-                  '& label.Mui-focused': { color: '#d8c7b2' }, 
+                  '& label.Mui-focused': { color: '#d8c7b2' },
                   '& .MuiOutlinedInput-root': {
-                    // '& fieldset': { borderColor: '#a47155' },
                     '&:hover fieldset': { borderColor: '#FF7A5A' },
                     '&.Mui-focused fieldset': { borderColor: '#FF7A5A' },
-                     '& input': {
-        color: 'white',
-        backgroundColor: '#2c2c2c',
-      },
-      '& input:-webkit-autofill': {
-        WebkitBoxShadow: '0 0 0 1000px #2c2c2c inset',
-        WebkitTextFillColor: 'white',
-        caretColor: 'white',
-      },
-       
+                    '& input': {
+                      color: 'white',
+                      backgroundColor: '#2c2c2c',
+                    },
+                    '& input:-webkit-autofill': {
+                      WebkitBoxShadow: '0 0 0 1000px #2c2c2c inset',
+                      WebkitTextFillColor: 'white',
+                      caretColor: 'white',
+                    },
                   },
                 }}
               />
@@ -189,17 +177,18 @@ const [btnState, setBtnState] = useState('default');
                 }}
                 InputLabelProps={{ sx: { color: '#d8c7b2' } }}
                 sx={{
-                  '& label.Mui-focused': { color: '#d8c7b2' }, 
+                  '& label.Mui-focused': { color: '#d8c7b2' },
                   '& .MuiOutlinedInput-root': {
-                    // '& fieldset': { borderColor: '#a47155' },
                     '&:hover fieldset': { borderColor: '#FF7A5A' },
                     '&.Mui-focused fieldset': { borderColor: '#FF7A5A' },
-                    
+                    '& input': {
+                      color: 'white',
+                      backgroundColor: '#2c2c2c',
+                    },
                   },
                 }}
               />
 
-              {/* ✅ Very small change here: animated button */}
               <Button
                 type="submit"
                 fullWidth
@@ -212,7 +201,11 @@ const [btnState, setBtnState] = useState('default');
                   bgcolor: btnState === 'error' ? '#f87171' : btnState === 'success' ? '#34d399' : '#FF7A5A',
                   color: '#1c0f0f',
                   textTransform: 'none',
-                  '&:hover': { bgcolor: btnState === 'error' ? '#f87171' : btnState === 'success' ? '#34d399' : '#e7643f', transform: 'scale(1.03)' },
+                  borderRadius: '1rem', // slightly rounded button
+                  '&:hover': {
+                    bgcolor: btnState === 'error' ? '#f87171' : btnState === 'success' ? '#34d399' : '#e7643f',
+                    transform: 'scale(1.03)',
+                  },
                 }}
               >
                 {renderBtnContent()}
@@ -229,7 +222,6 @@ const [btnState, setBtnState] = useState('default');
               Reset here
             </span>
           </Typography>
-        </Box>
       </Container>
     </motion.div>
   );
