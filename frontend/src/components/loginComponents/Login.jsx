@@ -154,6 +154,16 @@ const [btnState, setBtnState] = useState('default');
                     '& fieldset': { borderColor: '#a47155' },
                     '&:hover fieldset': { borderColor: '#FF7A5A' },
                     '&.Mui-focused fieldset': { borderColor: '#FF7A5A' },
+                     '& input': {
+        color: 'white',
+        backgroundColor: '#2c2c2c',
+      },
+      '& input:-webkit-autofill': {
+        WebkitBoxShadow: '0 0 0 1000px #2c2c2c inset',
+        WebkitTextFillColor: 'white',
+        caretColor: 'white',
+      },
+       
                   },
                 }}
               />
@@ -182,6 +192,7 @@ const [btnState, setBtnState] = useState('default');
                     '& fieldset': { borderColor: '#a47155' },
                     '&:hover fieldset': { borderColor: '#FF7A5A' },
                     '&.Mui-focused fieldset': { borderColor: '#FF7A5A' },
+                    
                   },
                 }}
               />
