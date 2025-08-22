@@ -3,7 +3,7 @@
 A web application that connects **builders and property owners**.  
 Find and match with builders who meet your dreams — and your demands.
 
-[Link](https://nirmaan-hetu.vercel.app/)
+[Live Preview](https://nirmaan-hetu.vercel.app/)
 
 ## Highlights
 
