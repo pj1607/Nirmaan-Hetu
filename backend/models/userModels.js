@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   googleId: {
     type: String,
     unique: true,
-    sparse: true, // Allows for multiple null googleId values (for non-Google users)
+    sparse: true,
   },
   username: {
     type: String,
@@ -15,6 +15,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Email is required'],
     unique: true,
+     index: true,
     lowercase: true,
   },
   password: {
