@@ -1,11 +1,15 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
+import {
+  Box,
+} from '@mui/material';
 
 import Home from './pages/home/Home';
 import Login from './pages/login/LoginPage.jsx';
 import Navbar from './components/Navbar.jsx';
 import { ToastContainer } from 'react-toastify';
+import Footer from './components/Footer.jsx';
 
 import OwnerDashboard from './pages/dashboard/owner/DashboardO.jsx';
 import BuilderDashboard from './pages/dashboard/builder/DashboardB.jsx';
@@ -31,7 +35,13 @@ const App = () => {
   };
 
   return (
-    <>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",  
+      }}
+    >
       <ToastContainer />
       <Navbar />
       <Routes>
@@ -56,7 +66,7 @@ const App = () => {
           }
         />
       </Routes>
-    </>
+ </Box>
   );
 };
 
