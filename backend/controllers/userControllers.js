@@ -145,3 +145,17 @@ export const login = async (req, res) => {
     });
   }
 };
+
+export const getProfile = async (req, res) => {
+  try {
+    const user = req.user;
+    res.status(200).json({
+      success: 'yes',
+      username: user.username,
+      role: user.role,
+      email: user.email,
+    });
+  } catch (err) {
+    res.status(500).json({ success: 'no', message: 'Server error' });
+  }
+};
