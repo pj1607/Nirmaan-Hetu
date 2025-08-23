@@ -16,7 +16,7 @@ import {
   IconButton
 } from '@mui/material';
 import { motion } from 'framer-motion';
-import { toast } from 'react-toastify';
+import { toast } from "react-hot-toast";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Visibility from '@mui/icons-material/Visibility';

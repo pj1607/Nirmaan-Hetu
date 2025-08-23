@@ -8,8 +8,8 @@ import {
 import Home from './pages/home/Home';
 import Login from './pages/login/LoginPage.jsx';
 import Navbar from './components/Navbar.jsx';
-import { ToastContainer } from 'react-toastify';
 import Footer from './components/Footer.jsx';
+import { Toaster } from "react-hot-toast";
 
 import OwnerDashboard from './pages/dashboard/owner/DashboardO.jsx';
 import BuilderDashboard from './pages/dashboard/builder/DashboardB.jsx';
@@ -42,7 +42,13 @@ const App = () => {
         minHeight: "100vh",  
       }}
     >
-      <ToastContainer />
+       <Toaster 
+        position="top-center" 
+        reverseOrder={false} 
+        toastOptions={{
+          duration: 3000,
+        }} 
+      />
       <Navbar />
       <Routes>
           <Route path="/oauth-success" element={<OAuthSuccess />} />

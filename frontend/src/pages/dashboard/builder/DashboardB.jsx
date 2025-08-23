@@ -150,11 +150,6 @@ const DashboardB = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { user } = useAuth();
 
-  const stats = [
-    { label: "Projects Completed", value: 12, icon: <Work />, color: "#FF7A5A" },
-    { label: "Clients", value: 8, icon: <People />, color: "#6FCF97" },
-  ];
-
   const cardVariant = {
     hidden: { opacity: 0, y: 30 },
     visible: (i) => ({
@@ -168,10 +163,10 @@ const DashboardB = () => {
     <Box sx={{ display: "flex", minHeight: "100vh", position: "relative" }}>
      <Sidebar role="builder" />
 
-
       <Box
         component="main"
         sx={{
+
           flexGrow: 1,
           p: { xs: 2, sm: 3 },
           position: "relative",
@@ -188,156 +183,7 @@ const DashboardB = () => {
           transition={{ duration: 0.5 }}
           style={{ position: "relative", zIndex: 1 }}
         >
-          <Container maxWidth="xl" sx={{ mt: 2 }}>
-            {/* Top Stats */}
-            <Grid container spacing={2} sx={{ mb: 3 }}>
-              {stats.map((stat, i) => (
-                <Grid item xs={12} sm={6} md={3} key={i}>
-                  <MotionCard
-                    custom={i}
-                    variants={cardVariant}
-                    initial="hidden"
-                    animate="visible"
-                    whileHover={{ scale: 1.03 }}
-                    sx={{
-                      borderRadius: 3,
-                      background: "#eed9d9ff",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-                      height: "100%",
-                      p: 1,
-                    }}
-                  >
-                    <CardContent sx={{ display: "flex", alignItems: "center" }}>
-                      <Box
-                        sx={{
-                          width: 44,
-                          height: 44,
-                          borderRadius: "12px",
-                          bgcolor: stat.color,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: "#fff4f4ff",
-                          mr: 2,
-                          flexShrink: 0,
-                        }}
-                      >
-                        {stat.icon}
-                      </Box>
-                      <Box>
-                        <Typography
-                          variant="h6"
-                          fontWeight="bold"
-                          sx={{ color: "#090909ff", fontSize: { xs: "1.1rem", sm: "1.25rem" } }}
-                        >
-                          {stat.value}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          sx={{ color: "#393736ff", fontSize: { xs: "0.8rem", sm: "0.9rem" } }}
-                        >
-                          {stat.label}
-                        </Typography>
-                      </Box>
-                    </CardContent>
-                  </MotionCard>
-                </Grid>
-              ))}
-            </Grid>
-
-            {/* Content */}
-            <Grid container spacing={3} sx={{ flexDirection: { xs: "column", sm: "row" } }}>
-              {/* Incoming Requests */}
-              <Grid item xs={12} sm={6}>
-                <MotionCard
-                  variants={cardVariant}
-                  initial="hidden"
-                  animate="visible"
-                  whileHover={{ scale: 1.01 }}
-                  sx={{
-                    borderRadius: 3,
-                    background: "#eed9d9ff",
-                    border: "1px solid #eee",
-                    boxShadow: "0 3px 10px rgba(0,0,0,0.05)",
-                  }}
-                >
-                  <CardContent>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        mb: 2,
-                        color: "#FF7A5A",
-                        fontWeight: "600",
-                        fontSize: { xs: "1rem", sm: "1.1rem" },
-                      }}
-                    >
-                      Incoming Requests
-                    </Typography>
-                    <Divider sx={{ mb: 2 }} />
-                    {[
-                      { owner: "Ramesh", project: "2BHK Flat", budget: "₹25L" },
-                      { owner: "Sita", project: "Renovation", budget: "₹8L" },
-                    ].map((req, i) => (
-                      <MotionBox
-                        key={i}
-                        whileHover={{ scale: 1.02 }}
-                        sx={{
-                          mb: 2,
-                          p: 2,
-                          borderRadius: 2,
-                          bgcolor: "#fafafa",
-                          border: "1px solid #eee",
-                        }}
-                      >
-                        <Typography fontWeight="bold" sx={{ color: "#333", fontSize: { xs: "0.95rem" } }}>
-                          {req.owner}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: "#555", fontSize: { xs: "0.8rem" } }}>
-                          {req.project} – {req.budget}
-                        </Typography>
-                        <Stack
-                          direction={{ xs: "column", sm: "row" }}
-                          spacing={1.5}
-                          mt={1}
-                          alignItems={{ xs: "stretch", sm: "center" }}
-                        >
-                          <Button
-                            size="small"
-                            fullWidth
-                            variant="contained"
-                            sx={{ bgcolor: "#FF7A5A", "&:hover": { bgcolor: "#e7643f" } }}
-                          >
-                            Accept
-                          </Button>
-                          <Button
-                            size="small"
-                            fullWidth
-                            variant="outlined"
-                            sx={{
-                              borderColor: "#FF7A5A",
-                              color: "#FF7A5A",
-                              "&:hover": { borderColor: "#e7643f", color: "#e7643f" },
-                            }}
-                          >
-                            Decline
-                          </Button>
-                        </Stack>
-                      </MotionBox>
-                    ))}
-                    <Button
-                      fullWidth
-                      sx={{
-                        mt: 2,
-                        bgcolor: "#FF7A5A",
-                        color: "#fff",
-                        "&:hover": { bgcolor: "#e7643f" },
-                      }}
-                    >
-                      View All Requests
-                    </Button>
-                  </CardContent>
-                </MotionCard>
-              </Grid>
+           
 
               {/* Portfolio */}
               <Grid item xs={12} sm={6}>
@@ -347,6 +193,7 @@ const DashboardB = () => {
                   animate="visible"
                   whileHover={{ scale: 1.01 }}
                   sx={{
+                    maxWidth: 700,
                     borderRadius: 3,
                     background: "#eed9d9ff",
                     border: "1px solid #eee",
@@ -401,8 +248,6 @@ const DashboardB = () => {
                   </CardContent>
                 </MotionCard>
               </Grid>
-            </Grid>
-          </Container>
         </motion.div>
       </Box>
         <PortfolioModal open={open} onClose={() => setOpen(false)}  />

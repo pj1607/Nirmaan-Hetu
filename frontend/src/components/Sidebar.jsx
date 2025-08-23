@@ -24,10 +24,8 @@ const Sidebar = ({ role = "builder" }) => {
   ];
 
   const builderMenu = [
-    { text: "Requests", icon: <Work />, route: "requests", modal: true },
     { text: "Portfolio", icon: <Folder />, route: "portfolio", modal: true },
     { text: "Profile", icon: <Person />, route: "profile", modal: true },
-    { text: "Settings", icon: <Settings />, route: "settings", modal: true },
   ];
 
   const menuItems = role === "owner" ? ownerMenu : builderMenu;

@@ -15,7 +15,7 @@ import {
   InputAdornment,
   IconButton
 } from '@mui/material';
-import { toast } from 'react-toastify';
+import { toast } from "react-hot-toast";
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Visibility from '@mui/icons-material/Visibility';
