@@ -159,3 +159,65 @@ export const getProfile = async (req, res) => {
     res.status(500).json({ success: 'no', message: 'Server error' });
   }
 };
+
+// Update Profile
+export const updateProfile = async (req, res) => {
+  try {
+    const user = req.user; // Authenticated user from middleware
+    const { username, email } = req.body;
+
+    if (!username || !email) {
+      return res.status(400).json({
+        message: "Username and email are required",
+        success: "no"
+      });
+    }
+
+    if (username.length < 4) {
+      return res.status(400).json({
+        message: "Username must be at least 4 characters long",
+        success: "no"
+      });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        message: "Please enter a valid email address",
+        success: "no"
+      });
+    }
+
+    // Check if email is taken by another user
+    const existingUser = await User.findOne({ email });
+    if (existingUser && existingUser._id.toString() !== user._id.toString()) {
+      return res.status(400).json({
+        message: "Email is already taken by another user",
+        success: "no"
+      });
+    }
+
+    // Update user
+    user.username = username;
+    user.email = email;
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      success: "yes",
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    console.error("Update Profile Error:", error);
+    res.status(500).json({
+      message: "Internal server error",
+      success: "no"
+    });
+  }
+};

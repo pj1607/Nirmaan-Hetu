@@ -207,3 +207,19 @@ export const deletePastWork = async (req, res) => {
     res.status(500).json({ error: "Server error while deleting past work" });
   }
 };
+
+
+export const getAllPortfolios = async (req, res) => {
+  try {
+    if (req.user.role !== "owner") {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const portfolios = await Portfolio.find().populate("createdBy", "username email");
+
+    res.status(200).json({ success: true, portfolios });
+  } catch (error) {
+    console.error("Failed to fetch portfolios:", error);
+    res.status(500).json({ error: "Server error while fetching portfolios" });
+  }
+};
