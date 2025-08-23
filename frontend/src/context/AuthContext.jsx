@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
 
     const fetchProfile = async () => {
       try {
-        const { data } = await axios.get(`${API}/auth/profile`, {
+        const { data } = await axios.get(`${API}/auth/get-profile`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
