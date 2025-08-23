@@ -2,6 +2,7 @@ import express, { Router } from 'express';
 import dotenv from 'dotenv';
 import connectDB from './config/conn.js';
 import User from './routes/userRoutes.js';
+import Builder from "./routes/builderRoutes.js"
 
 import cors from 'cors';
 
@@ -29,6 +30,7 @@ app.use(cors({
 }));
 
 app.use('/auth', User);
+app.use('/builder', Builder);
 
 
 app.get('/', (req, res) => {
