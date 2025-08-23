@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Container,
@@ -8,44 +8,42 @@ import {
   Typography,
   Stack,
   Avatar,
-  IconButton,
-  Rating,
-  Divider,
   Button,
+  IconButton,
 } from "@mui/material";
 import { motion } from "framer-motion";
-import { Email, Phone } from "@mui/icons-material";
+import { Email } from "@mui/icons-material";
 import Sidebar from "../../../components/Sidebar";
+import axios from "axios";
+import ViewBuilderModal from "../../../modal/ViewBuilderModal";
 
 const MotionCard = motion(Card);
+const API = import.meta.env.VITE_API_URL;
 
 const DashboardO = () => {
-  const builders = [
-    {
-      name: "Ramesh Kumar",
-      skills: ["Residential", "Interior Design", "2BHK"],
-      rating: 4.5,
-      avatar: "https://i.pravatar.cc/100?img=1",
-      email: "ramesh@example.com",
-      phone: "+91 98765 43210",
-    },
-    {
-      name: "Sita Verma",
-      skills: ["Commercial", "Renovation", "Luxury"],
-      rating: 4.2,
-      avatar: "https://i.pravatar.cc/100?img=2",
-      email: "sita@example.com",
-      phone: "+91 91234 56789",
-    },
-    {
-      name: "Amit Sharma",
-      skills: ["Villas", "Modern Design", "Eco Homes"],
-      rating: 4.8,
-      avatar: "https://i.pravatar.cc/100?img=3",
-      email: "amit@example.com",
-      phone: "+91 99887 66554",
-    },
-  ];
+  const [portfolios, setPortfolios] = useState([]);
+  const [selectedPortfolio, setSelectedPortfolio] = useState(null);
+  const [open, setOpen] = useState(false);
+
+  const handleOpen = (portfolio) => {
+    setSelectedPortfolio(portfolio);
+    setOpen(true);
+  };
+  const handleClose = () => setOpen(false);
+
+  useEffect(() => {
+    const fetchPortfolios = async () => {
+      try {
+        const res = await axios.get(`${API}/builder/all-portfolios`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
+        setPortfolios(res.data.portfolios);
+      } catch (err) {
+        console.error("Failed to fetch portfolios:", err);
+      }
+    };
+    fetchPortfolios();
+  }, []);
 
   const cardVariant = {
     hidden: { opacity: 0, y: 30 },
@@ -58,22 +56,16 @@ const DashboardO = () => {
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
-     <Sidebar role="owner" />
-
+      <Sidebar role="owner" />
       <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, sm: 3 } }}>
         <Container maxWidth="xl">
-          <Typography
-            variant="h5"
-            fontWeight="bold"
-            sx={{ mb: 3, color: "#FF7A5A" }}
-          >
+          <Typography variant="h5" fontWeight="bold" sx={{ mb: 3, color: "#FF7A5A" }}>
             Builders Directory
           </Typography>
 
-          {/* Grid ensures equal-height cards */}
           <Grid container spacing={3} alignItems="stretch">
-            {builders.map((builder, i) => (
-              <Grid item xs={12} sm={6} md={4} key={i} sx={{ display: "flex" }}>
+            {portfolios.map((portfolio, i) => (
+              <Grid item xs={12} sm={6} md={4} key={portfolio._id} sx={{ display: "flex" }}>
                 <MotionCard
                   custom={i}
                   variants={cardVariant}
@@ -84,94 +76,83 @@ const DashboardO = () => {
                     borderRadius: 3,
                     background: "#eed9d9ff",
                     boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-                    p: 1,
-                    flex: 1, // 🔥 ensures equal stretch
+                    p: 2,
+                    flex: 1,
                     display: "flex",
                     flexDirection: "column",
                   }}
                 >
-                  <CardContent
-                    sx={{ flex: 1, display: "flex", flexDirection: "column" }}
-                  >
-                    {/* Avatar + Name */}
-                    <Stack direction="row" spacing={2} alignItems="center">
-                      <Avatar
-                        src={builder.avatar}
-                        alt={builder.name}
-                        sx={{ width: 56, height: 56 }}
-                      />
-                      <Box>
-                        <Typography
-                          variant="h6"
-                          fontWeight="600"
-                          sx={{ color: "#333" }}
-                        >
-                          {builder.name}
-                        </Typography>
-                        <Rating
-                          value={builder.rating}
-                          precision={0.1}
-                          readOnly
-                          size="small"
-                        />
-                      </Box>
-                    </Stack>
+                  <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
+                    <Avatar
+                      src={portfolio.logo?.url || `https://i.pravatar.cc/100?u=${portfolio._id}`}
+                      alt={portfolio.company}
+                      sx={{ width: 56, height: 56 }}
+                    />
+                    <Box>
+                      <Typography variant="h6" fontWeight={600} sx={{ color: "#333" }}>
+                        {portfolio.company}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {portfolio.createdBy?.username} {/* Builder Name */}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {portfolio.experience} yrs experience
+                      </Typography>
+                    </Box>
+                  </Stack>
 
-                    <Divider sx={{ my: 2 }} />
-
-                    {/* Skills */}
-                    <Stack direction="row" spacing={1} flexWrap="wrap">
-                      {builder.skills.map((skill, idx) => (
-                        <Box
-                          key={idx}
-                          sx={{
-                            bgcolor: "#fafafa",
-                            border: "1px solid #ddd",
-                            px: 1.2,
-                            py: 0.5,
-                            borderRadius: 2,
-                            fontSize: "0.8rem",
-                            color: "#555",
-                          }}
-                        >
-                          {skill}
-                        </Box>
-                      ))}
-                    </Stack>
-
-                    <Divider sx={{ my: 2 }} />
-
-                    {/* Contact */}
-                    <Stack direction="row" spacing={1}>
-                      <IconButton
-                        color="primary"
-                        href={`mailto:${builder.email}`}
+                  <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 1 }}>
+                    {portfolio.pastWorks?.map((work, idx) => (
+                      <Button
+                        key={idx}
+                        size="small"
+                        variant="outlined"
+                        sx={{
+                          textTransform: "none",
+                          mb: 0.5,
+                          borderColor: "#ddd",
+                          color: "#555",
+                          "&:hover": { borderColor: "#FF7A5A" },
+                        }}
                       >
-                        <Email />
-                      </IconButton>
-                      <IconButton color="secondary" href={`tel:${builder.phone}`}>
-                        <Phone />
-                      </IconButton>
-                    </Stack>
+                        {work.title}
+                      </Button>
+                    ))}
+                  </Stack>
 
-                    {/* Button always at bottom */}
-                    <Button
-                      fullWidth
-                      size="small"
-                      sx={{
-                        mt: "auto", // pushes button down
-                        bgcolor: "#FF7A5A",
-                        color: "#fff",
-                        "&:hover": { bgcolor: "#e7643f" },
-                      }}
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" mt="auto">
+                    <Box>
+                      <Typography variant="body2">{portfolio.createdBy?.email}</Typography>
+                    </Box>
+                    <IconButton
+                      color="primary"
+                      component="a"
+                      href={`mailto:${portfolio.createdBy?.email}`}
                     >
-                      View Profile
-                    </Button>
-                  </CardContent>
+                      <Email sx={{ color: "#FF7A5A" }} />
+                    </IconButton>
+                  </Stack>
+
+                  <Button
+                    fullWidth
+                    size="small"
+                    sx={{ mt: 1, bgcolor: "#FF7A5A", color: "#fff", "&:hover": { bgcolor: "#e7643f" } }}
+                    onClick={() => handleOpen(portfolio)}
+                  >
+                    View More
+                  </Button>
                 </MotionCard>
               </Grid>
             ))}
           </Grid>
+
+          {selectedPortfolio && (
+            <ViewBuilderModal
+              open={open}
+              handleClose={handleClose}
+              portfolio={selectedPortfolio}
+            />
+          )}
         </Container>
       </Box>
     </Box>

@@ -1,26 +1,25 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
-  Dashboard,
-  Work,
-  Folder,
   Person,
-  Settings,
-  People,
-  Payments,
-  Assignment,
+  Folder,
 } from "@mui/icons-material";
-import { Box, IconButton, Tooltip, Modal, Paper } from "@mui/material";
+import { Box, IconButton, Tooltip, } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 
 import PortfolioModal from "../modal/PortfolioModal";
+import ProfileModal from "../modal/ProfileModal"; // Import your common profile modal
+import { useAuth } from "../context/AuthContext"; // Assuming you have AuthContext to get current user
 
 const Sidebar = ({ role = "builder" }) => {
   const [open, setOpen] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [portfolioModalOpen, setPortfolioModalOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const sidebarRef = useRef(null);
 
+  const { user, setUser } = useAuth(); // Get current user
+
   const ownerMenu = [
-    { text: "Settings", icon: <Settings />, route: "settings", modal: true },
+    { text: "Profile", icon: <Person />, route: "profile", modal: true },
   ];
 
   const builderMenu = [
@@ -50,7 +49,10 @@ const Sidebar = ({ role = "builder" }) => {
 
   const handleClick = (item) => {
     if (item.route === "portfolio") {
-      setModalOpen(true);
+      setPortfolioModalOpen(true);
+    }
+    if (item.route === "profile") {
+      setProfileModalOpen(true);
     }
     setOpen(false);
   };
@@ -126,7 +128,16 @@ const Sidebar = ({ role = "builder" }) => {
       </Box>
 
       {/* Portfolio Modal */}
-      <PortfolioModal open={modalOpen} onClose={() => setModalOpen(false)} />
+      <PortfolioModal open={portfolioModalOpen} onClose={() => setPortfolioModalOpen(false)} />
+
+      {/* Profile Modal */}
+      <ProfileModal
+        open={profileModalOpen}
+        handleClose={() => setProfileModalOpen(false)}
+        user={user}
+        role={role}
+        onUpdate={(updatedUser) => setUser(updatedUser)}
+      />
     </>
   );
 };

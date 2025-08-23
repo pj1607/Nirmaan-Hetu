@@ -180,7 +180,7 @@ const PastWorkModal = ({ open, onClose, onAdd }) => {
             onClick={(e) => e.stopPropagation()}
           >
             <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-              <Typography variant="h6" fontWeight={700} color="black">Add Past Work</Typography>
+              <Typography variant="h6" fontWeight={700} color="#FF7A5A">Add Past Work</Typography>
               <IconButton onClick={onClose}><Close /></IconButton>
             </Box>
             <Divider sx={{ mb: 2 }} />

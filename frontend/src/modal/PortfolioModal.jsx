@@ -202,7 +202,7 @@ const handleDeleteLogo = async () => {
             onClick={(e) => e.stopPropagation()}
           >
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
-              <Typography variant="h6" fontWeight={700} color="black">
+              <Typography variant="h6" fontWeight={700} color="#FF7A5A">
                 {portfolioExists ? "Edit Portfolio" : "Add Portfolio"}
               </Typography>
               <IconButton onClick={onClose} aria-label="Close"><Close /></IconButton>
@@ -238,7 +238,7 @@ const handleDeleteLogo = async () => {
               <Stack spacing={1} mt={1}>
                 {formData.pastWorks.map((work) => (
                   <Box key={work._id} sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 1, bgcolor: "#fff", borderRadius: 1, border: "1px solid #ddd" }}>
-                    <Typography variant="body2" color="black">{work.title}</Typography>
+                    <Typography variant="body2" color="#c2735fff">{work.title}</Typography>
                     <IconButton size="small" onClick={() => { setSelectedWorkId(work._id); setConfirmOpen(true); }}>
                       <Delete fontSize="small" />
                     </IconButton>
