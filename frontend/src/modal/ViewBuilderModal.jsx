@@ -96,15 +96,18 @@ const ViewBuilderModal = ({ open, handleClose, portfolio }) => {
                 <Typography variant="body2" sx={{ color: "#555" }}>
                   {portfolio.createdBy?.email}
                 </Typography>
-                <Button
-                  variant="contained"
-                  sx={{ bgcolor: "#FF7A5A", "&:hover": { bgcolor: "#e7643f" } }}
-                  startIcon={<Email />}
-                  component="a"
-                  href={`mailto:${portfolio.createdBy?.email}`}
-                >
-                  Email
-                </Button>
+<Button
+  variant="contained"
+  sx={{ bgcolor: "#FF7A5A", "&:hover": { bgcolor: "#e7643f" } }}
+  startIcon={<Email />}
+  component="a"
+  href={`https://mail.google.com/mail/?view=cm&to=${portfolio.createdBy?.email}`}
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  Email
+</Button>
+
               </Stack>
             </MotionBox>
           </Modal>

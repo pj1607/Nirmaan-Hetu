@@ -124,13 +124,16 @@ const DashboardO = () => {
                     <Box>
                       <Typography variant="body2">{portfolio.createdBy?.email}</Typography>
                     </Box>
-                    <IconButton
-                      color="primary"
-                      component="a"
-                      href={`mailto:${portfolio.createdBy?.email}`}
-                    >
-                      <Email sx={{ color: "#FF7A5A" }} />
-                    </IconButton>
+                  <IconButton
+  color="primary"
+  component="a"
+  href={`https://mail.google.com/mail/?view=cm&to=${portfolio.createdBy?.email}`}
+  target="_blank"
+  rel="noopener noreferrer"
+>
+  <Email sx={{ color: "#FF7A5A" }} />
+</IconButton>
+
                   </Stack>
 
                   <Button
