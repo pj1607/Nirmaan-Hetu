@@ -213,15 +213,6 @@ const Login = () => {
             </Stack>
           </form>
 
-          <Typography variant="body2" sx={{ mt: 3, textAlign: 'center', color: '#c0b3a0' }}>
-            Forgot your password?{' '}
-            <span
-              onClick={() => navigate('/forgot-password')}
-              style={{ color: '#FF7A5A', cursor: 'pointer', fontWeight: 'bold', textDecoration: 'underline' }}
-            >
-              Reset here
-            </span>
-          </Typography>
       </Container>
     </motion.div>
   );
