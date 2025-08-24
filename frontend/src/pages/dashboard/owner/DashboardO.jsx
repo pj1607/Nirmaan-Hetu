@@ -66,22 +66,24 @@ const DashboardO = () => {
           <Grid container spacing={3} alignItems="stretch">
             {portfolios.map((portfolio, i) => (
               <Grid item xs={12} sm={6} md={4} key={portfolio._id} sx={{ display: "flex" }}>
-                <MotionCard
-                  custom={i}
-                  variants={cardVariant}
-                  initial="hidden"
-                  animate="visible"
-                  whileHover={{ scale: 1.02 }}
-                  sx={{
-                    borderRadius: 3,
-                    background: "#eed9d9ff",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-                    p: 2,
-                    flex: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
+              <MotionCard
+  custom={i}
+  variants={cardVariant}
+  initial="hidden"
+  animate="visible"
+  whileHover={{ scale: 1.02 }}
+  sx={{
+    borderRadius: 3,
+    background: "#eed9d9ff",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+    p: 2,
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    height: { xs: 300, sm: 300 }, 
+    width: { xs: 300, sm: 400 }, 
+  }}
+>
                   <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
                     <Avatar
                       src={portfolio.logo?.url || `https://i.pravatar.cc/100?u=${portfolio._id}`}
