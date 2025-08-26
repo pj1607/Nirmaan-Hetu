@@ -91,7 +91,6 @@ const Login = () => {
       headers: { "Content-Type": "application/json" }
     });
 
-    // 👇 FIXED: rename destructured role
     const { token, username, role: userRole } = res.data.data;
 
     login(token, username, userRole);
@@ -240,8 +239,48 @@ const Login = () => {
               >
                 {renderBtnContent()}
               </Button>
-              <Button onClick={() => handleDemoLogin("owner")}>Demo as Owner</Button>
-<Button onClick={() => handleDemoLogin("builder")}>Demo as Builder</Button>
+<Button
+  onClick={() => handleDemoLogin("owner")}
+  fullWidth
+  variant="outlined"
+  sx={{
+    py: 1.2,
+    fontWeight: 'bold',
+    fontSize: '0.95rem',
+    textTransform: 'none',
+    borderRadius: '1rem',
+    borderColor: '#807e7eff',
+    color: '#807e7eff',
+    '&:hover': {
+      bgcolor: 'rgba(255, 122, 90, 0.1)',
+      borderColor: '#9f9c9bff',
+    },
+  }}
+>
+  Demo as Owner
+</Button>
+
+<Button
+  onClick={() => handleDemoLogin("builder")}
+  fullWidth
+  variant="outlined"
+  sx={{
+    py: 1.2,
+    fontWeight: 'bold',
+    fontSize: '0.95rem',
+    textTransform: 'none',
+    borderRadius: '1rem',
+    borderColor: '#807e7eff',
+    color: '#807e7eff',
+    '&:hover': {
+      bgcolor: 'rgba(255, 122, 90, 0.1)',
+      borderColor: '#9f9c9bff',
+    },
+  }}
+>
+  Demo as Builder
+</Button>
+
 
             </Stack>
           </form>
