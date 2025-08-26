@@ -41,7 +41,10 @@ const Login = () => {
     password: '',
     role: 'owner',
   });
-
+const [demoLoading, setDemoLoading] = useState({
+  owner: false,
+  builder: false,
+});
   const [showPassword, setShowPassword] = useState(false);
   const [btnState, setBtnState] = useState('default');
 
@@ -87,6 +90,7 @@ const Login = () => {
 
   const handleDemoLogin = async (role) => {
   try {
+     setDemoLoading((prev) => ({ ...prev, [role]: true }));
     const res = await axios.post(`${API}/auth/demo-login`, { role }, {
       headers: { "Content-Type": "application/json" }
     });
@@ -110,6 +114,9 @@ const Login = () => {
       error.response?.data?.error ||
       'Demo login failed.';
     toast.error(message);
+  }
+  finally {
+    setDemoLoading((prev) => ({ ...prev, [role]: false }));
   }
 };
 
@@ -243,6 +250,7 @@ const Login = () => {
   onClick={() => handleDemoLogin("owner")}
   fullWidth
   variant="outlined"
+  disabled={demoLoading.owner}
   sx={{
     py: 1.2,
     fontWeight: 'bold',
@@ -257,13 +265,14 @@ const Login = () => {
     },
   }}
 >
-  Demo as Owner
+  {demoLoading.owner ? <CircularProgress size={24} sx={{ color: '#807e7eff' }} /> : "Demo as Owner"}
 </Button>
 
 <Button
   onClick={() => handleDemoLogin("builder")}
   fullWidth
   variant="outlined"
+  disabled={demoLoading.builder}
   sx={{
     py: 1.2,
     fontWeight: 'bold',
@@ -278,8 +287,9 @@ const Login = () => {
     },
   }}
 >
-  Demo as Builder
+  {demoLoading.builder ? <CircularProgress size={24} sx={{ color: '#807e7eff' }} /> : "Demo as Builder"}
 </Button>
+
 
 
             </Stack>
