@@ -85,6 +85,36 @@ const Login = () => {
     }
   };
 
+  const handleDemoLogin = async (role) => {
+  try {
+    const res = await axios.post(`${API}/auth/demo-login`, { role }, {
+      headers: { "Content-Type": "application/json" }
+    });
+
+    // 👇 FIXED: rename destructured role
+    const { token, username, role: userRole } = res.data.data;
+
+    login(token, username, userRole);
+
+    toast.success(`Welcome, ${username}!`);
+
+    setTimeout(() => {
+      if (userRole === 'owner') navigate('/dashboard/owner', { replace: true });
+      else if (userRole === 'builder') navigate('/dashboard/builder', { replace: true });
+      else navigate('/', { replace: true });
+    }, 500);
+
+  } catch (error) {
+    console.error("Demo login failed", error);
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      'Demo login failed.';
+    toast.error(message);
+  }
+};
+
+
   const renderBtnContent = () => {
     if (btnState === 'loading') return <CircularProgress size={26} sx={{ color: '#fefefeff' }} />;
     if (btnState === 'success') return '✔ Login Successful';
@@ -210,6 +240,9 @@ const Login = () => {
               >
                 {renderBtnContent()}
               </Button>
+              <Button onClick={() => handleDemoLogin("owner")}>Demo as Owner</Button>
+<Button onClick={() => handleDemoLogin("builder")}>Demo as Builder</Button>
+
             </Stack>
           </form>
 
