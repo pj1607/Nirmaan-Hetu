@@ -1,163 +1,53 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
-  Typography,
+  Container,
   Grid,
   Card,
-  CardContent,
-  Button,
+  Typography,
   Stack,
-  Toolbar,
-  Divider,
-  useTheme,
-  useMediaQuery,
+  Avatar,
+  Button,
+  IconButton,
   CircularProgress,
 } from "@mui/material";
 import { motion } from "framer-motion";
-import { useAuth } from "../../../context/AuthContext";
+import { Email } from "@mui/icons-material";
 import Sidebar from "../../../components/Sidebar";
-import PortfolioModal from "../../../modal/PortfolioModal";
 import axios from "axios";
+import ViewBuilderModal from "../../../modal/ViewBuilderModal";
 
-const API = import.meta.env.VITE_API_URL;
 const MotionCard = motion(Card);
-const MotionBox = motion(Box);
+const API = import.meta.env.VITE_API_URL;
 
-const DecorativeSVG = () => (
-  <Box
-    aria-hidden
-    sx={{
-      position: "absolute",
-      inset: 0,
-      overflow: "hidden",
-      pointerEvents: "none",
-      zIndex: 0,
-    }}
-  >
-    <Box
-      sx={{
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        width: "100%",
-        opacity: 0.2,
-      }}
-    >
-      <svg viewBox="0 0 1440 360" width="100%" height="100%" style={{ display: "block" }}>
-        <defs>
-          <style>{`
-            .stroke { stroke: #5b5b5b; stroke-width: 2.1; stroke-linejoin: round; stroke-linecap: round; }
-            .fillNone { fill: none; }
-            .fillWhite { fill: #ffffff; }
-            .winFill { fill: #8ED3FF; opacity: .75; }
-          `}</style>
-          <linearGradient id="fadeGrad" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="white" stopOpacity="0" />
-            <stop offset="35%" stopColor="white" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="white" stopOpacity="1" />
-          </linearGradient>
-        </defs>
-        <g mask="url(#fadeMask)">
-          <line className="stroke" x1="0" y1="320" x2="1440" y2="320" />
-          <line className="stroke" x1="0" y1="338" x2="1440" y2="338" />
-          <g transform="translate(80,0)">
-            {/* Left short building */}
-            <g transform="translate(0,80)">
-              <rect className="fillWhite stroke" x="0" y="60" width="120" height="200" />
-              {[20, 50, 80, 110].map((y, i) => (
-                <g key={i}>
-                  <rect className="winFill stroke" x="24" y={y + 70} width="22" height="22" />
-                  <rect className="winFill stroke" x="74" y={y + 70} width="22" height="22" />
-                </g>
-              ))}
-              <line className="stroke" x1="0" y1="60" x2="120" y2="60" />
-            </g>
-            {/* Tall center-left tower */}
-            <g transform="translate(160,10)">
-              <rect className="fillWhite stroke" x="0" y="10" width="160" height="300" />
-              {[40, 90, 140, 190, 240].map((y, r) =>
-                [20, 80, 120].map((x, c) => (
-                  <g key={`${r}-${c}`}>
-                    <rect className="fillNone stroke" x={x} y={y} width="30" height="30" />
-                    <line className="stroke" x1={x + 6} y1={y + 8} x2={x + 14} y2={y + 16} />
-                  </g>
-                ))
-              )}
-              <rect className="fillNone stroke" x="60" y="260" width="40" height="50" />
-            </g>
-            {/* Mid building with roof slab */}
-            <g transform="translate(360,70)">
-              <rect className="fillWhite stroke" x="0" y="40" width="220" height="22" />
-              <rect className="fillWhite stroke" x="12" y="60" width="196" height="240" />
-              <g transform="translate(40,90)">
-                <rect className="fillNone stroke" x="0" y="0" width="60" height="60" />
-                <line className="stroke" x1="30" y1="0" x2="30" y2="60" />
-                <line className="stroke" x1="0" y1="30" x2="60" y2="30" />
-              </g>
-              <g transform="translate(130,90)">
-                <rect className="fillNone stroke" x="0" y="0" width="60" height="60" />
-                <line className="stroke" x1="30" y1="0" x2="30" y2="60" />
-                <line className="stroke" x1="0" y1="30" x2="60" y2="30" />
-              </g>
-              <rect className="fillNone stroke" x="90" y="220" width="40" height="60" />
-            </g>
-            {/* Small back building */}
-            <g transform="translate(310,20)">
-              <rect className="fillNone stroke" x="0" y="60" width="90" height="110" />
-              {[0, 24, 48, 72].map((x, i) => (
-                <rect key={i} className="winFill stroke" x={8 + x} y="72" width="14" height="14" />
-              ))}
-              {[0, 24, 48, 72].map((x, i) => (
-                <rect key={`b-${i}`} className="winFill stroke" x={8 + x} y="96" width="14" height="14" />
-              ))}
-            </g>
-            {/* Right buildings */}
-            <g transform="translate(610,0)">
-              <rect className="fillNone stroke" x="0" y="60" width="100" height="220" />
-              {[20, 70, 120, 170].map((y, r) => (
-                <rect key={r} className="fillNone stroke" x="32" y={y} width="36" height="36" />
-              ))}
-            </g>
-            <g transform="translate(740,30)">
-              <rect className="fillNone stroke" x="0" y="30" width="80" height="250" />
-              {[60, 120, 180].map((y, r) => (
-                <rect key={r} className="fillNone stroke" x="26" y={y} width="28" height="28" />
-              ))}
-            </g>
-          </g>
-        </g>
-      </svg>
-    </Box>
-  </Box>
-);
-
-const DashboardB = () => {
+const DashboardO = () => {
+  const [portfolios, setPortfolios] = useState([]);
+  const [selectedPortfolio, setSelectedPortfolio] = useState(null);
   const [open, setOpen] = useState(false);
-  const [portfolio, setPortfolio] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // ✅ Loader state
 
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const { user } = useAuth();
+  const handleOpen = (portfolio) => {
+    setSelectedPortfolio(portfolio);
+    setOpen(true);
+  };
+  const handleClose = () => setOpen(false);
 
   useEffect(() => {
-    const fetchPortfolio = async () => {
+    const fetchPortfolios = async () => {
       try {
-        setLoading(true);
-        const { data } = await axios.get(`${API}/builder/get-portfolio`, {
+        setLoading(true); // start loader
+        const res = await axios.get(`${API}/builder/all-portfolios`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
-        setPortfolio(data.portfolio);
+        setPortfolios(res.data.portfolios);
       } catch (err) {
-        console.error("Failed to fetch portfolio", err);
+        console.error("Failed to fetch portfolios:", err);
       } finally {
-        setLoading(false);
+        setLoading(false); // stop loader
       }
     };
-    fetchPortfolio();
+    fetchPortfolios();
   }, []);
-
-  const firstThreeImages = portfolio?.pastWorks?.[0]?.images?.slice(0, 3) || [];
 
   const cardVariant = {
     hidden: { opacity: 0, y: 30 },
@@ -169,114 +59,133 @@ const DashboardB = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", position: "relative" }}>
-      <Sidebar role="builder" />
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+      <Sidebar role="owner" />
+      <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, sm: 3 } }}>
+        <Container maxWidth="xl">
+          <Typography variant="h5" fontWeight="bold" sx={{ mb: 3, color: "#FF7A5A" }}>
+            Builders Directory
+          </Typography>
 
-      <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, sm: 3 }, position: "relative" }}>
-        <DecorativeSVG />
-        <Toolbar />
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          style={{ position: "relative", zIndex: 1 }}
-        >
-          {/* Portfolio Card */}
-          <Grid item xs={12} sm={6}>
-            <MotionCard
-              variants={cardVariant}
-              initial="hidden"
-              animate="visible"
-              whileHover={{ scale: 1.01 }}
-              sx={{
-                maxWidth: 700,
-                borderRadius: 3,
-                background: "#eed9d9ff",
-                border: "1px solid #eee",
-                boxShadow: "0 3px 10px rgba(0,0,0,0.05)",
-              }}
-            >
-              <CardContent>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    mb: 2,
-                    color: "#FF7A5A",
-                    fontWeight: "600",
-                    fontSize: { xs: "1rem", sm: "1.1rem" },
-                  }}
-                >
-                  Portfolio
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-
-                {loading ? (
-                  <Box display="flex" justifyContent="center" alignItems="center" minHeight={100}>
-                    <CircularProgress />
-                  </Box>
-                ) : (
-                  <Stack
-                    direction="row"
-                    spacing={2}
-                    flexWrap="wrap"
-                    justifyContent={{ xs: "center", sm: "flex-start" }}
+          {/* ✅ Loader */}
+          {loading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 10 }}>
+              <CircularProgress sx={{ color: "#FF7A5A" }} />
+            </Box>
+          ) : portfolios.length === 0 ? (
+            <Typography variant="body1" color="text.secondary" textAlign="center" mt={5}>
+              No portfolios found.
+            </Typography>
+          ) : (
+            <Grid container spacing={3} alignItems="stretch">
+              {portfolios.map((portfolio, i) => (
+                <Grid item xs={12} sm={6} md={4} key={portfolio._id} sx={{ display: "flex" }}>
+                  <MotionCard
+                    custom={i}
+                    variants={cardVariant}
+                    initial="hidden"
+                    animate="visible"
+                    whileHover={{ scale: 1.02 }}
+                    sx={{
+                      borderRadius: 3,
+                      background: "#eed9d9ff",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+                      p: 2,
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      height: { xs: 300, sm: 300 },
+                      width: { xs: 300, sm: 400 },
+                    }}
                   >
-                    {firstThreeImages.length > 0 ? (
-                      firstThreeImages.map((img, idx) => (
-                        <MotionBox
+                    <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
+                      <Avatar
+                        src={portfolio.logo?.url || `https://i.pravatar.cc/100?u=${portfolio._id}`}
+                        alt={portfolio.company}
+                        sx={{ width: 56, height: 56 }}
+                      />
+                      <Box>
+                        <Typography variant="h6" fontWeight={600} sx={{ color: "#333" }}>
+                          {portfolio.company}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {portfolio.createdBy?.username}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {portfolio.experience} yrs experience
+                        </Typography>
+                      </Box>
+                    </Stack>
+
+                    <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 1 }}>
+                      {portfolio.pastWorks?.map((work, idx) => (
+                        <Button
                           key={idx}
-                          whileHover={{ scale: 1.05 }}
+                          size="small"
+                          variant="outlined"
                           sx={{
-                            width: { xs: 70, sm: 100 },
-                            height: { xs: 90, sm: 80 },
-                            borderRadius: 2,
-                            backgroundImage: `url(${img})`,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                            border: "1px solid #eee",
+                            textTransform: "none",
+                            mb: 0.5,
+                            borderColor: "#ddd",
+                            color: "#555",
+                            "&:hover": { borderColor: "#FF7A5A" },
                           }}
-                        />
-                      ))
-                    ) : (
-                      [1, 2, 3].map((i) => (
-                        <MotionBox
-                          key={i}
-                          whileHover={{ scale: 1.05 }}
-                          sx={{
-                            width: { xs: 70, sm: 100 },
-                            height: { xs: 90, sm: 80 },
-                            borderRadius: 2,
-                            bgcolor: "#fafafa",
-                            border: "1px solid #eee",
-                          }}
-                        />
-                      ))
-                    )}
-                  </Stack>
-                )}
+                        >
+                          {work.title}
+                        </Button>
+                      ))}
+                    </Stack>
 
-                <Button
-                  fullWidth
-                  onClick={() => setOpen(true)}
-                  sx={{
-                    mt: 2,
-                    bgcolor: "#FF7A5A",
-                    color: "#fff",
-                    "&:hover": { bgcolor: "#e7643f" },
-                  }}
-                >
-                  Manage Portfolio
-                </Button>
-              </CardContent>
-            </MotionCard>
-          </Grid>
-        </motion.div>
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      mt="auto"
+                    >
+                      <Box>
+                        <Typography variant="body2">{portfolio.createdBy?.email}</Typography>
+                      </Box>
+                      <IconButton
+                        color="primary"
+                        component="a"
+                        href={`https://mail.google.com/mail/?view=cm&to=${portfolio.createdBy?.email}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Email sx={{ color: "#FF7A5A" }} />
+                      </IconButton>
+                    </Stack>
+
+                    <Button
+                      fullWidth
+                      size="small"
+                      sx={{
+                        mt: 1,
+                        bgcolor: "#FF7A5A",
+                        color: "#fff",
+                        "&:hover": { bgcolor: "#e7643f" },
+                      }}
+                      onClick={() => handleOpen(portfolio)}
+                    >
+                      View More
+                    </Button>
+                  </MotionCard>
+                </Grid>
+              ))}
+            </Grid>
+          )}
+
+          {selectedPortfolio && (
+            <ViewBuilderModal
+              open={open}
+              handleClose={handleClose}
+              portfolio={selectedPortfolio}
+            />
+          )}
+        </Container>
       </Box>
-
-      <PortfolioModal open={open} onClose={() => setOpen(false)} />
     </Box>
   );
 };
 
-export default DashboardB;
+export default DashboardO;
