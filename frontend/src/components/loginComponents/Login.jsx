@@ -237,7 +237,7 @@ const [demoLoading, setDemoLoading] = useState({
                   bgcolor: btnState === 'error' ? '#f87171' : btnState === 'success' ? '#34d399' : '#FF7A5A',
                   color: '#1c0f0f',
                   textTransform: 'none',
-                  borderRadius: '1rem', // slightly rounded button
+                  borderRadius: '1rem',
                   '&:hover': {
                     bgcolor: btnState === 'error' ? '#f87171' : btnState === 'success' ? '#34d399' : '#e7643f',
                     transform: 'scale(1.03)',
@@ -246,26 +246,37 @@ const [demoLoading, setDemoLoading] = useState({
               >
                 {renderBtnContent()}
               </Button>
+
 <Button
   onClick={() => handleDemoLogin("owner")}
   fullWidth
   variant="outlined"
   disabled={demoLoading.owner}
-  sx={{
-    py: 1.2,
-    fontWeight: 'bold',
-    fontSize: '0.95rem',
-    textTransform: 'none',
-    borderRadius: '1rem',
-    borderColor: '#807e7eff',
-    color: '#807e7eff',
-    '&:hover': {
-      bgcolor: 'rgba(255, 122, 90, 0.1)',
-      borderColor: '#9f9c9bff',
+    sx={{
+    py: 0.7,
+    fontSize: "0.85rem",
+    fontWeight: 600,
+    borderRadius: "0.8rem",
+    textTransform: "none",
+    backdropFilter: "blur(8px)",
+    bgcolor: "rgba(58, 59, 59, 0.1)",  
+    color: "#e0e0e0",
+    border: "1px solid rgba(255,255,255,0.15)",
+    transition: "all 0.25s ease-in-out",
+    "&:hover": {
+      bgcolor: "rgba(65, 65, 65, 0.2)",
+    },
+    "&.Mui-disabled": {
+      bgcolor: "rgba(255,255,255,0.02)",
+      color: "#777",
     },
   }}
 >
-  {demoLoading.owner ? <CircularProgress size={24} sx={{ color: '#807e7eff' }} /> : "Demo as Owner"}
+  {demoLoading.owner ? (
+    <CircularProgress size={18} sx={{ color: "#e0e0e0" }} />
+  ) : (
+    "Demo as Owner"
+  )}
 </Button>
 
 <Button
@@ -274,22 +285,31 @@ const [demoLoading, setDemoLoading] = useState({
   variant="outlined"
   disabled={demoLoading.builder}
   sx={{
-    py: 1.2,
-    fontWeight: 'bold',
-    fontSize: '0.95rem',
-    textTransform: 'none',
-    borderRadius: '1rem',
-    borderColor: '#807e7eff',
-    color: '#807e7eff',
-    '&:hover': {
-      bgcolor: 'rgba(255, 122, 90, 0.1)',
-      borderColor: '#9f9c9bff',
+    py: 0.7,
+    fontSize: "0.85rem",
+    fontWeight: 600,
+    borderRadius: "0.8rem",
+    textTransform: "none",
+    backdropFilter: "blur(8px)",
+    bgcolor: "rgba(58, 59, 59, 0.1)",  
+    color: "#e0e0e0",
+    border: "1px solid rgba(255,255,255,0.15)",
+    transition: "all 0.25s ease-in-out",
+    "&:hover": {
+      bgcolor: "rgba(65, 65, 65, 0.2)",
+    },
+    "&.Mui-disabled": {
+      bgcolor: "rgba(255,255,255,0.02)",
+      color: "#777",
     },
   }}
 >
-  {demoLoading.builder ? <CircularProgress size={24} sx={{ color: '#807e7eff' }} /> : "Demo as Builder"}
+  {demoLoading.builder ? (
+    <CircularProgress size={18} sx={{ color: "#e0e0e0" }} />
+  ) : (
+    "Demo as Builder"
+  )}
 </Button>
-
 
 
             </Stack>
