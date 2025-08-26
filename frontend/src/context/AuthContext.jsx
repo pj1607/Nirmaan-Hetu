@@ -9,7 +9,8 @@ export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
   const [role, setRole] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // ✅ Profile loading
+  const [logoutLoading, setLogoutLoading] = useState(false); // ✅ Logout loader
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -53,17 +54,25 @@ export const AuthProvider = ({ children }) => {
     setRole(role);
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    localStorage.removeItem('role');
-    localStorage.removeItem('isLogin');
+  const logout = async () => {
+    try {
+      setLogoutLoading(true); 
+      
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      localStorage.removeItem('role');
+      localStorage.removeItem('isLogin');
 
-    setIsLoggedIn(false);
-    setUsername('');
-    setRole('');
+      setIsLoggedIn(false);
+      setUsername('');
+      setRole('');
 
-    toast.success('Logout successful!');
+      toast.success('Logout successful!');
+    } catch (err) {
+      toast.error('Logout failed, try again!');
+    } finally {
+      setLogoutLoading(false);
+    }
   };
 
   return (
@@ -71,6 +80,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         isLoggedIn,
         loading,
+        logoutLoading,   
         login,
         logout,
         username,

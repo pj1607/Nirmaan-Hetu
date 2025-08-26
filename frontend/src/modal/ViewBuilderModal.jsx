@@ -47,11 +47,13 @@ const ViewBuilderModal = ({ open, handleClose, portfolio }) => {
             >
               {/* Header: Logo + Company */}
               <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
-                <Avatar
-                  src={portfolio.logo?.url || `https://i.pravatar.cc/100?u=${portfolio._id}`}
-                  alt={portfolio.company}
-                  sx={{ width: 64, height: 64 }}
-                />
+                      <Avatar
+                 src={portfolio.logo?.url || undefined}
+                 alt={portfolio.company}
+                 sx={{ width: 56, height: 56, bgcolor: "#202020ff", color: "#fff", fontWeight: 600 }}
+               >
+                 {!portfolio.logo?.url && portfolio.company?.charAt(0)?.toUpperCase()}
+               </Avatar>
                 <Box>
                   <Typography variant="h6" fontWeight={600} sx={{ color: "#FF7A5A" }}>
                     {portfolio.company}

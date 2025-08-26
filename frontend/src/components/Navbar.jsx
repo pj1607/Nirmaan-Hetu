@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -6,6 +6,7 @@ import {
   IconButton,
   Box,
   Tooltip,
+  CircularProgress,
 } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import LoginIcon from '@mui/icons-material/Login';
@@ -17,6 +18,18 @@ import logo from '../assets/logo.png';
 const Navbar = () => {
   const navigate = useNavigate();
   const { isLoggedIn, role, logout } = useAuth();
+  const [loading, setLoading] = useState(false);
+
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      await logout(); // your logout function from context
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   let menuItems = [];
   if (!isLoggedIn) {
@@ -34,7 +47,7 @@ const Navbar = () => {
         { label: 'Dashboard', path: '/dashboard/builder', icon: <DashboardIcon /> },
       ];
     }
-    menuItems.push({ label: 'Logout', action: logout }); 
+    menuItems.push({ label: 'Logout', action: handleLogout, icon: <LoginIcon /> });
   }
 
   return (
@@ -93,6 +106,7 @@ const Navbar = () => {
               <Button
                 key={item.label}
                 onClick={item.action}
+                disabled={loading}
                 sx={{
                   color: '#000000ff',
                   fontWeight: 600,
@@ -102,7 +116,7 @@ const Navbar = () => {
                   '&:hover': { color: '#FF7A5A', transform: 'scale(1.08)' },
                 }}
               >
-                {item.label}
+                {loading ? <CircularProgress size={20} color="inherit" /> : item.label}
               </Button>
             ) : (
               <Button
@@ -130,13 +144,18 @@ const Navbar = () => {
               <Tooltip title={item.label} key={item.label}>
                 <IconButton
                   onClick={item.action}
+                  disabled={loading}
                   sx={{
                     color: '#000000ff',
                     transition: 'transform 0.3s ease-in-out',
                     '&:hover': { color: '#FF7A5A', transform: 'scale(1.08)' },
                   }}
                 >
-                  {item.icon || <LoginIcon />}
+                  {loading ? (
+                    <CircularProgress size={22} color="inherit" />
+                  ) : (
+                    item.icon || <LoginIcon />
+                  )}
                 </IconButton>
               </Tooltip>
             ) : (

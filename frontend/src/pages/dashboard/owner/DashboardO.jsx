@@ -4,12 +4,12 @@ import {
   Container,
   Grid,
   Card,
-  CardContent,
   Typography,
   Stack,
   Avatar,
   Button,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import { motion } from "framer-motion";
 import { Email } from "@mui/icons-material";
@@ -24,6 +24,7 @@ const DashboardO = () => {
   const [portfolios, setPortfolios] = useState([]);
   const [selectedPortfolio, setSelectedPortfolio] = useState(null);
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(true); // ✅ Loader state
 
   const handleOpen = (portfolio) => {
     setSelectedPortfolio(portfolio);
@@ -34,12 +35,15 @@ const DashboardO = () => {
   useEffect(() => {
     const fetchPortfolios = async () => {
       try {
+        setLoading(true); // start loader
         const res = await axios.get(`${API}/builder/all-portfolios`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         setPortfolios(res.data.portfolios);
       } catch (err) {
         console.error("Failed to fetch portfolios:", err);
+      } finally {
+        setLoading(false); // stop loader
       }
     };
     fetchPortfolios();
@@ -63,93 +67,116 @@ const DashboardO = () => {
             Builders Directory
           </Typography>
 
-          <Grid container spacing={3} alignItems="stretch">
-            {portfolios.map((portfolio, i) => (
-              <Grid item xs={12} sm={6} md={4} key={portfolio._id} sx={{ display: "flex" }}>
-              <MotionCard
-  custom={i}
-  variants={cardVariant}
-  initial="hidden"
-  animate="visible"
-  whileHover={{ scale: 1.02 }}
-  sx={{
-    borderRadius: 3,
-    background: "#eed9d9ff",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-    p: 2,
-    flex: 1,
-    display: "flex",
-    flexDirection: "column",
-    height: { xs: 300, sm: 300 }, 
-    width: { xs: 300, sm: 400 }, 
-  }}
->
-                  <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
-                    <Avatar
-                      src={portfolio.logo?.url || `https://i.pravatar.cc/100?u=${portfolio._id}`}
-                      alt={portfolio.company}
-                      sx={{ width: 56, height: 56 }}
-                    />
-                    <Box>
-                      <Typography variant="h6" fontWeight={600} sx={{ color: "#333" }}>
-                        {portfolio.company}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {portfolio.createdBy?.username} {/* Builder Name */}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {portfolio.experience} yrs experience
-                      </Typography>
-                    </Box>
-                  </Stack>
-
-                  <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 1 }}>
-                    {portfolio.pastWorks?.map((work, idx) => (
-                      <Button
-                        key={idx}
-                        size="small"
-                        variant="outlined"
-                        sx={{
-                          textTransform: "none",
-                          mb: 0.5,
-                          borderColor: "#ddd",
-                          color: "#555",
-                          "&:hover": { borderColor: "#FF7A5A" },
-                        }}
-                      >
-                        {work.title}
-                      </Button>
-                    ))}
-                  </Stack>
-
-                  <Stack direction="row" justifyContent="space-between" alignItems="center" mt="auto">
-                    <Box>
-                      <Typography variant="body2">{portfolio.createdBy?.email}</Typography>
-                    </Box>
-                  <IconButton
-  color="primary"
-  component="a"
-  href={`https://mail.google.com/mail/?view=cm&to=${portfolio.createdBy?.email}`}
-  target="_blank"
-  rel="noopener noreferrer"
->
-  <Email sx={{ color: "#FF7A5A" }} />
-</IconButton>
-
-                  </Stack>
-
-                  <Button
-                    fullWidth
-                    size="small"
-                    sx={{ mt: 1, bgcolor: "#FF7A5A", color: "#fff", "&:hover": { bgcolor: "#e7643f" } }}
-                    onClick={() => handleOpen(portfolio)}
+          {/* ✅ Loader */}
+          {loading ? (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 10 }}>
+              <CircularProgress sx={{ color: "#FF7A5A" }} />
+            </Box>
+          ) : portfolios.length === 0 ? (
+            <Typography variant="body1" color="text.secondary" textAlign="center" mt={5}>
+              No portfolios found.
+            </Typography>
+          ) : (
+            <Grid container spacing={3} alignItems="stretch">
+              {portfolios.map((portfolio, i) => (
+                <Grid item xs={12} sm={6} md={4} key={portfolio._id} sx={{ display: "flex" }}>
+                  <MotionCard
+                    custom={i}
+                    variants={cardVariant}
+                    initial="hidden"
+                    animate="visible"
+                    whileHover={{ scale: 1.02 }}
+                    sx={{
+                      borderRadius: 3,
+                      background: "#eed9d9ff",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+                      p: 2,
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      height: { xs: 300, sm: 300 },
+                      width: { xs: 300, sm: 400 },
+                    }}
                   >
-                    View More
-                  </Button>
-                </MotionCard>
-              </Grid>
-            ))}
-          </Grid>
+                    <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
+                     <Avatar
+  src={portfolio.logo?.url || undefined}
+  alt={portfolio.company}
+  sx={{ width: 56, height: 56, bgcolor: "#202020ff", color: "#fff", fontWeight: 600 }}
+>
+  {!portfolio.logo?.url && portfolio.company?.charAt(0)?.toUpperCase()}
+</Avatar>
+
+                      <Box>
+                        <Typography variant="h6" fontWeight={600} sx={{ color: "#333" }}>
+                          {portfolio.company}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {portfolio.createdBy?.username}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {portfolio.experience} yrs experience
+                        </Typography>
+                      </Box>
+                    </Stack>
+
+                    <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 1 }}>
+                      {portfolio.pastWorks?.map((work, idx) => (
+                        <Button
+                          key={idx}
+                          size="small"
+                          variant="outlined"
+                          sx={{
+                            textTransform: "none",
+                            mb: 0.5,
+                            borderColor: "#ddd",
+                            color: "#555",
+                            "&:hover": { borderColor: "#FF7A5A" },
+                          }}
+                        >
+                          {work.title}
+                        </Button>
+                      ))}
+                    </Stack>
+
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      mt="auto"
+                    >
+                      <Box>
+                        <Typography variant="body2">{portfolio.createdBy?.email}</Typography>
+                      </Box>
+                      <IconButton
+                        color="primary"
+                        component="a"
+                        href={`https://mail.google.com/mail/?view=cm&to=${portfolio.createdBy?.email}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Email sx={{ color: "#FF7A5A" }} />
+                      </IconButton>
+                    </Stack>
+
+                    <Button
+                      fullWidth
+                      size="small"
+                      sx={{
+                        mt: 1,
+                        bgcolor: "#FF7A5A",
+                        color: "#fff",
+                        "&:hover": { bgcolor: "#e7643f" },
+                      }}
+                      onClick={() => handleOpen(portfolio)}
+                    >
+                      View More
+                    </Button>
+                  </MotionCard>
+                </Grid>
+              ))}
+            </Grid>
+          )}
 
           {selectedPortfolio && (
             <ViewBuilderModal
