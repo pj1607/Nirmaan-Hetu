@@ -221,3 +221,36 @@ export const updateProfile = async (req, res) => {
     });
   }
 };
+
+
+// Demo Login Controller
+export const demoLogin = async (req, res) => {
+  try {
+    const { role } = req.body;
+
+    const demoUser = await User.findOne({ role, email: role === "owner" ? "demo.owner@gmail.com" : "demo.builder@gmail.com" });
+
+    if (!demoUser) {
+      return res.status(404).json({ error: "Demo user not found" });
+    }
+
+    const token = jwt.sign(
+      { id: demoUser._id, role: demoUser.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.json({
+      message: "Demo login successful",
+      data: {
+        id: demoUser._id,
+        username: demoUser.username,
+        email: demoUser.email,
+        role: demoUser.role,
+        token
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Something went wrong" });
+  }
+};
