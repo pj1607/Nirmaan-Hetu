@@ -4,11 +4,9 @@ import { verifyToken } from '../auth/auth.js';
 
 const router = express.Router();
 
-
 router.get('/ping', (req, res) => {
   res.status(200).send("pong");
 });
-
 
 router.post('/register', register);
 router.post('/login', login);
