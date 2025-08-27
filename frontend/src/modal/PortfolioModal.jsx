@@ -260,7 +260,7 @@ const PortfolioModal = ({ open, onClose }) => {
               <Button type="submit" variant="contained" disabled={loading}
                 sx={{ bgcolor: "#FF7A5A", "&:hover": { bgcolor: "#e7643f" }, display: "flex", alignItems: "center", gap: 1 }}
               >
-                {loading && <CircularProgress size={20} color="inherit" />}
+                {loading && <CircularProgress size={20} color="#fff" />}
                 {portfolioExists ? "Update Portfolio" : "Save Portfolio"}
               </Button>
             </Stack>
