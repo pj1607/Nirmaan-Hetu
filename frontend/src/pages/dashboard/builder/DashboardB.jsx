@@ -216,7 +216,7 @@ const DashboardB = () => {
 
                   {loading ? (
                     <Box display="flex" justifyContent="center" alignItems="center" minHeight={100}>
-                      <CircularProgress color="inherit" />
+                      <CircularProgress color="#fff" />
                     </Box>
                   ) : (
                     <Stack
