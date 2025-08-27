@@ -1,3 +1,4 @@
+// PastWorkViewModal.jsx
 import React, { useState, useEffect } from "react";
 import { Modal, Box, Typography, Stack, Avatar, Button } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,23 +29,23 @@ const PastWorkViewModal = ({ open, handleClose, work, portfolio }) => {
             exit={{ y: "100%", opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeInOut" }}
             sx={{
-              bgcolor: "#eed9d9ff",
-              color: "#333",
+              bgcolor: "#1e1e1e", // dark background
+              color: "#fff",
               borderTopLeftRadius: 16,
               borderTopRightRadius: 16,
               width: { xs: "95%", sm: 600, md: 700 },
               maxHeight: "90vh",
               overflowY: "auto",
               p: 3,
-              boxShadow: 24,
+              boxShadow: "0 -6px 30px rgba(0,0,0,0.25)",
             }}
           >
             {/* Header: Logo + Company */}
             <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
-                     <Avatar
+              <Avatar
                 src={portfolio.logo?.url || undefined}
                 alt={portfolio.company}
-                sx={{ width: 56, height: 56, bgcolor: "#202020ff", color: "#fff", fontWeight: 600 }}
+                sx={{ width: 56, height: 56, bgcolor: "#343333", color: "#fff", fontWeight: 600 }}
               >
                 {!portfolio.logo?.url && portfolio.company?.charAt(0)?.toUpperCase()}
               </Avatar>
@@ -52,23 +53,23 @@ const PastWorkViewModal = ({ open, handleClose, work, portfolio }) => {
                 <Typography variant="h6" fontWeight={600} sx={{ color: "#FF7A5A" }}>
                   {portfolio.company}
                 </Typography>
-                <Typography variant="body2" sx={{ color: "#555" }}>
+                <Typography variant="body2" sx={{ color: "#aaa" }}>
                   {portfolio.createdBy?.username}
                 </Typography>
               </Box>
             </Stack>
 
             {/* Work Details */}
-            <Typography variant="h6" sx={{ mb: 1 }}>
+            <Typography variant="h6" sx={{ mb: 1, color: "#FF7A5A" }}>
               {work.title}
             </Typography>
             {work.description && (
-              <Typography variant="body2" sx={{ mb: 2 }}>
+              <Typography variant="body2" sx={{ mb: 2, color: "#ccc" }}>
                 {work.description}
               </Typography>
             )}
             {work.price && (
-              <Typography variant="body2" fontWeight={600} sx={{ mb: 2 }}>
+              <Typography variant="body2" fontWeight={600} sx={{ mb: 2, color: "#ccc" }}>
                 Price: ₹{work.price}
               </Typography>
             )}
@@ -87,7 +88,7 @@ const PastWorkViewModal = ({ open, handleClose, work, portfolio }) => {
                     objectFit: "cover",
                     borderRadius: 2,
                     cursor: "pointer",
-                    border: selectedImage === img ? "2px solid #FF7A5A" : "1px solid #ddd",
+                    border: selectedImage === img ? "2px solid #FF7A5A" : "1px solid #555",
                   }}
                   onClick={() => setSelectedImage(img)}
                 />
@@ -106,6 +107,7 @@ const PastWorkViewModal = ({ open, handleClose, work, portfolio }) => {
                   objectFit: "contain",
                   mb: 2,
                   borderRadius: 2,
+                  border: "1px solid #555",
                 }}
               />
             )}

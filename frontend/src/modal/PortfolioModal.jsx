@@ -14,6 +14,7 @@ import { toast } from "react-hot-toast";
 const API = import.meta.env.VITE_API_URL;
 const MotionBox = motion(Box);
 
+// Centralized Field component with consistent styling
 const Field = React.memo(function Field({ label, name, type = "text", multiline = false, rows, value, onChange }) {
   return (
     <TextField
@@ -27,6 +28,24 @@ const Field = React.memo(function Field({ label, name, type = "text", multiline 
       onChange={onChange}
       variant="outlined"
       size="medium"
+      InputProps={{ style: { color: "#fff" } }}
+      InputLabelProps={{ style: { color: "#ccc" } }}
+      sx={{
+        bgcolor: "#2c2c2c",
+        borderRadius: 1.5,
+        "& .MuiOutlinedInput-notchedOutline": { borderColor: "#555" },
+        "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#FF7A5A" },
+        "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#FF7A5A" },
+        "& input": { color: "white" },
+        "& input:-webkit-autofill": {
+          WebkitBoxShadow: "0 0 0 1000px #2c2c2c inset",
+          WebkitTextFillColor: "white",
+          caretColor: "white",
+        },
+        "& .MuiOutlinedInput-root": {
+          "&.Mui-focused fieldset": { borderColor: "#FF7A5A" },
+        }
+      }}
     />
   );
 });
@@ -35,8 +54,8 @@ const PortfolioModal = ({ open, onClose }) => {
   const [formData, setFormData] = useState({
     company: "", experience: "", address: "", description: "", pastWorks: [], logo: null
   });
-  const [logoFile, setLogoFile] = useState(null); 
-  const [logoPreview, setLogoPreview] = useState(null); // preview for newly uploaded logo
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [pastWorkModalOpen, setPastWorkModalOpen] = useState(false);
   const [portfolioExists, setPortfolioExists] = useState(false);
@@ -57,9 +76,9 @@ const PortfolioModal = ({ open, onClose }) => {
           address: res.data.portfolio.address || "",
           description: res.data.portfolio.description || "",
           pastWorks: res.data.portfolio.pastWorks || [],
-          logo: res.data.portfolio.logo || null, // keep Cloudinary object
+          logo: res.data.portfolio.logo || null,
         });
-        setLogoPreview(res.data.portfolio.logo?.url || null); // for Avatar src
+        setLogoPreview(res.data.portfolio.logo?.url || null);
         setPortfolioExists(true);
       } else {
         setFormData({ company: "", experience: "", address: "", description: "", pastWorks: [], logo: null });
@@ -108,68 +127,57 @@ const PortfolioModal = ({ open, onClose }) => {
   const handleLogoUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    setLogoFile(file); 
+    setLogoFile(file);
 
-    // preview locally
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setLogoPreview(reader.result);
-    };
+    reader.onloadend = () => setLogoPreview(reader.result);
     reader.readAsDataURL(file);
   };
 
-const handleDeleteLogo = async () => {
-  try {
-    setLoading(true);
+  const handleDeleteLogo = async () => {
+    try {
+      setLoading(true);
+      if (formData.logo && !logoFile) {
+        const res = await axios.delete(`${API}/builder/delete-logo`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
 
-    // If logo exists on server, delete via API
-    if (formData.logo && !logoFile) {
-      const res = await axios.delete(`${API}/builder/delete-logo`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-
-      if (res.data.success) {
-        toast.success("Logo deleted");
-        setFormData((prev) => ({ ...prev, logo: null }));
-        setLogoPreview(null);
+        if (res.data.success) {
+          toast.success("Logo deleted");
+          setFormData((prev) => ({ ...prev, logo: null }));
+          setLogoPreview(null);
+        } else {
+          toast.error(res.data.error || "Failed to delete logo");
+        }
       } else {
-        toast.error(res.data.error || "Failed to delete logo");
+        setLogoFile(null);
+        setLogoPreview(formData.logo?.url || null);
       }
-    } else {
-      setLogoFile(null);
-      setLogoPreview(formData.logo?.url || null); 
-    }
-
-  } catch (err) {
-    console.error(err);
-    toast.error(err.response?.data?.error || "Something went wrong");
-  } finally {
-    setLoading(false);
-  }
-};
-
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.error || "Something went wrong");
+    } finally { setLoading(false); }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setLoading(true);
-
       const data = new FormData();
       data.append("company", formData.company);
       data.append("experience", formData.experience);
       data.append("address", formData.address);
       data.append("description", formData.description);
       data.append("pastWorks", JSON.stringify(formData.pastWorks));
-      if (logoFile) data.append("logo", logoFile); 
+      if (logoFile) data.append("logo", logoFile);
 
-      let res;
       if (portfolioExists) {
-        res = await axios.put(`${API}/builder/update-portfolio`, data, {
+        await axios.put(`${API}/builder/update-portfolio`, data, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}`, "Content-Type": "multipart/form-data" },
         });
         toast.success("Portfolio updated!");
       } else {
-        res = await axios.post(`${API}/builder/add-portfolio`, data, {
+        await axios.post(`${API}/builder/add-portfolio`, data, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}`, "Content-Type": "multipart/form-data" },
         });
         toast.success("Portfolio added!");
@@ -194,10 +202,12 @@ const handleDeleteLogo = async () => {
             exit={{ y: "100%", opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.18, ease: "easeInOut" }}
             sx={{
-              bgcolor: "#eed9d9ff", borderTopLeftRadius: 16, borderTopRightRadius: 16,
+              bgcolor: "#1e1e1e",
+              color: "#fff",
+              borderTopLeftRadius: 16, borderTopRightRadius: 16,
               width: "100%", maxWidth: 640, mx: "auto", p: { xs: 2, sm: 3 },
-              maxHeight: "85vh", overflowY: "auto", position: "relative",
-              boxShadow: "0 -4px 20px rgba(0,0,0,0.2)"
+              maxHeight: "90vh", overflowY: "auto", position: "relative",
+              boxShadow: "0 -4px 20px rgba(0,0,0,0.3)"
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -205,41 +215,42 @@ const handleDeleteLogo = async () => {
               <Typography variant="h6" fontWeight={700} color="#FF7A5A">
                 {portfolioExists ? "Edit Portfolio" : "Add Portfolio"}
               </Typography>
-              <IconButton onClick={onClose} aria-label="Close"><Close /></IconButton>
+              <IconButton onClick={onClose} aria-label="Close" sx={{ color: "#fff" }}><Close /></IconButton>
             </Box>
-            <Divider sx={{ mb: 2 }} />
+            <Divider sx={{ mb: 2, borderColor: "#555" }} />
 
             <Stack spacing={2}>
               {/* Logo Upload */}
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 {logoPreview ? (
                   <>
-                    <Avatar src={logoPreview} alt="Logo" sx={{ width: 64, height: 64, border: "2px solid #ddd" }} />
-                    <IconButton onClick={handleDeleteLogo} aria-label="Delete Logo">
+                    <Avatar src={logoPreview} alt="Logo" sx={{ width: 64, height: 64, border: "2px solid #555" }} />
+                    <IconButton onClick={handleDeleteLogo} aria-label="Delete Logo" sx={{ color: "#fff" }}>
                       <Delete />
                     </IconButton>
                   </>
                 ) : (
-                  <Button component="label" variant="outlined" startIcon={<Upload />}>
+                  <Button component="label" variant="outlined" startIcon={<Upload />} sx={{ color: "#FF7A5A", borderColor: "#FF7A5A" }}>
                     Upload Logo
                     <input type="file" accept="image/*" hidden onChange={handleLogoUpload} />
                   </Button>
                 )}
               </Box>
 
+              {/* All fields with same styling */}
               <Field label="Company Name" name="company" value={formData.company} onChange={handleChange} />
               <Field label="Years of Experience" name="experience" type="number" value={formData.experience} onChange={handleChange} />
               <Field label="Company Address" name="address" multiline rows={2} value={formData.address} onChange={handleChange} />
               <Field label="Description / Skills" name="description" multiline rows={3} value={formData.description} onChange={handleChange} />
 
-              <Button variant="outlined" onClick={() => setPastWorkModalOpen(true)}>Add Past Work</Button>
+              <Button variant="outlined" onClick={() => setPastWorkModalOpen(true)} sx={{ color: "#FF7A5A", borderColor: "#FF7A5A" }}>Add Past Work</Button>
 
               {/* Past Works List */}
               <Stack spacing={1} mt={1}>
                 {formData.pastWorks.map((work) => (
-                  <Box key={work._id} sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 1, bgcolor: "#fff", borderRadius: 1, border: "1px solid #ddd" }}>
-                    <Typography variant="body2" color="#c2735fff">{work.title}</Typography>
-                    <IconButton size="small" onClick={() => { setSelectedWorkId(work._id); setConfirmOpen(true); }}>
+                  <Box key={work._id} sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", p: 1, bgcolor: "#2a2a2a", borderRadius: 1, border: "1px solid #555" }}>
+                    <Typography variant="body2" color="#FF7A5A">{work.title}</Typography>
+                    <IconButton size="small" onClick={() => { setSelectedWorkId(work._id); setConfirmOpen(true); }} sx={{ color: "#fff" }}>
                       <Delete fontSize="small" />
                     </IconButton>
                   </Box>

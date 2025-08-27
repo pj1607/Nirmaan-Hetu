@@ -1,41 +1,38 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  Container,
-  Grid,
-  Card,
-  Typography,
-  Stack,
-  Avatar,
-  Button,
-  IconButton,
-  CircularProgress,
-} from "@mui/material";
-import { motion } from "framer-motion";
-import { Email } from "@mui/icons-material";
+import { Typography, Avatar, Button, Tag, Row, Col, Card, Skeleton } from "antd";
+import { MailOutlined } from "@ant-design/icons";
 import Sidebar from "../../../components/Sidebar";
 import axios from "axios";
+import { motion } from "framer-motion";
 import ViewBuilderModal from "../../../modal/ViewBuilderModal";
+import PastWorkViewModal from "../../../modal/PastWorkViewModal";
 
-const MotionCard = motion(Card);
 const API = import.meta.env.VITE_API_URL;
 
 const DashboardO = () => {
   const [portfolios, setPortfolios] = useState([]);
   const [selectedPortfolio, setSelectedPortfolio] = useState(null);
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(true); // ✅ Loader state
+  const [loading, setLoading] = useState(true);
+  const [selectedWork, setSelectedWork] = useState(null);
+  const [pastWorkOpen, setPastWorkOpen] = useState(false);
 
-  const handleOpen = (portfolio) => {
+  const handleOpenPortfolio = (portfolio) => {
     setSelectedPortfolio(portfolio);
     setOpen(true);
   };
-  const handleClose = () => setOpen(false);
+  const handleClosePortfolio = () => setOpen(false);
+
+  const handleOpenPastWork = (work) => {
+    setSelectedWork(work);
+    setPastWorkOpen(true);
+  };
+  const handleClosePastWork = () => setPastWorkOpen(false);
 
   useEffect(() => {
     const fetchPortfolios = async () => {
       try {
-        setLoading(true); // start loader
+        setLoading(true);
         const res = await axios.get(`${API}/builder/all-portfolios`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
@@ -43,151 +40,175 @@ const DashboardO = () => {
       } catch (err) {
         console.error("Failed to fetch portfolios:", err);
       } finally {
-        setLoading(false); // stop loader
+        setLoading(false);
       }
     };
     fetchPortfolios();
   }, []);
 
-  const cardVariant = {
+  const cardVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: (i) => ({
-      opacity: 1,
-      y: 0,
-      transition: { delay: i * 0.2, duration: 0.5 },
-    }),
+    visible: { opacity: 1, y: 0 },
   };
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+    <div style={{ display: "flex", minHeight: "100vh", marginTop: 70, color: "#fff" }}>
       <Sidebar role="owner" />
-      <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, sm: 3 } }}>
-        <Container maxWidth="xl">
-          <Typography variant="h5" fontWeight="bold" sx={{ mb: 3, color: "#FF7A5A" }}>
-            Builders Directory
-          </Typography>
-
-          {/* ✅ Loader */}
-          {loading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 10 }}>
-              <CircularProgress sx={{ color: "#FF7A5A" }} />
-            </Box>
-          ) : portfolios.length === 0 ? (
-            <Typography variant="body1" color="text.secondary" textAlign="center" mt={5}>
-              No portfolios found.
-            </Typography>
-          ) : (
-            <Grid container spacing={3} alignItems="stretch">
-              {portfolios.map((portfolio, i) => (
-                <Grid item xs={12} sm={6} md={4} key={portfolio._id} sx={{ display: "flex" }}>
-                  <MotionCard
-                    custom={i}
-                    variants={cardVariant}
-                    initial="hidden"
-                    animate="visible"
-                    whileHover={{ scale: 1.02 }}
-                    sx={{
-                      borderRadius: 3,
-                      background: "#eed9d9ff",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-                      p: 2,
-                      flex: 1,
+      <div style={{ flexGrow: 1, padding: 24 }}>
+        {loading ? (
+          <Row gutter={[24, 24]}>
+            {[...Array(6)].map((_, idx) => (
+              <Col xs={24} sm={12} md={8} key={idx}>
+                <Skeleton active paragraph={{ rows: 4 }} style={{ backgroundColor: "#1f1f1f" }} />
+              </Col>
+            ))}
+          </Row>
+        ) : portfolios.length === 0 ? (
+          <Typography.Text
+            style={{ display: "block", textAlign: "center", marginTop: 50, fontSize: 18, color: "#aaa" }}
+          >
+            No portfolios found.
+          </Typography.Text>
+        ) : (
+          <Row gutter={[24, 24]}>
+            {portfolios.map((portfolio, idx) => (
+              <Col xs={24} sm={12} md={8} key={portfolio._id}>
+                <motion.div
+                  initial="hidden"
+                  animate="visible"
+                  variants={cardVariants}
+                  transition={{ duration: 0.5, delay: idx * 0.1 }}
+                >
+                  <Card
+                    hoverable
+                    style={{
+                          boxShadow: "none", 
+                          border: "none",     
+                      borderRadius: 16,
+                      overflow: "hidden",
+                      transition: "transform 0.3s, box-shadow 0.3s",
+                      height: 200,
                       display: "flex",
                       flexDirection: "column",
-                      height: { xs: 300, sm: 300 },
-                      width: { xs: 300, sm: 400 },
+                      backgroundColor: "#1e1e1e",
+                      color: "#fff",
+                    }}
+                    bodyStyle={{ padding: 16, display: "flex", flexDirection: "column", flexGrow: 1 }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "scale(1.03)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "scale(1)";
                     }}
                   >
-                    <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
-                     <Avatar
-  src={portfolio.logo?.url || undefined}
-  alt={portfolio.company}
-  sx={{ width: 56, height: 56, bgcolor: "#202020ff", color: "#fff", fontWeight: 600 }}
->
-  {!portfolio.logo?.url && portfolio.company?.charAt(0)?.toUpperCase()}
-</Avatar>
-
-                      <Box>
-                        <Typography variant="h6" fontWeight={600} sx={{ color: "#333" }}>
+                    <div style={{ display: "flex", alignItems: "center", marginBottom: 12 }}>
+                      <Avatar
+                        size={64}
+                        src={portfolio.logo?.url}
+                        style={{
+                          backgroundColor: portfolio.logo ? "transparent" : "#FF7A5A",
+                          marginRight: 16,
+                          fontSize: 24,
+                          color: "#fff",
+                        }}
+                      >
+                        {!portfolio.logo?.url && portfolio.company?.charAt(0)?.toUpperCase()}
+                      </Avatar>
+                      <div>
+                        <Typography.Text strong style={{ fontSize: 16, color: "#fff" }}>
                           {portfolio.company}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        </Typography.Text>
+                        <br />
+                        <Typography.Text type="secondary" style={{ color: "#aaa" }}>
                           {portfolio.createdBy?.username}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        </Typography.Text>
+                        <br />
+                        <Typography.Text type="secondary" style={{ color: "#aaa" }}>
                           {portfolio.experience} yrs experience
-                        </Typography>
-                      </Box>
-                    </Stack>
+                        </Typography.Text>
+                      </div>
+                    </div>
 
-                    <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ mb: 1 }}>
+                    <div
+                      style={{
+                        marginBottom: 12,
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 6,
+                        maxHeight: 60,
+                        overflowY: "auto",
+                      }}
+                    >
                       {portfolio.pastWorks?.map((work, idx) => (
-                        <Button
+                        <Tag
+                          color="default"
                           key={idx}
-                          size="small"
-                          variant="outlined"
-                          sx={{
-                            textTransform: "none",
-                            mb: 0.5,
-                            borderColor: "#ddd",
-                            color: "#555",
-                            "&:hover": { borderColor: "#FF7A5A" },
-                          }}
+                          style={{ cursor: "pointer", backgroundColor: "#333", color: "#fff" }}
+                          onClick={() => handleOpenPastWork(work)}
                         >
                           {work.title}
-                        </Button>
+                        </Tag>
                       ))}
-                    </Stack>
+                    </div>
 
-                    <Stack
-                      direction="row"
-                      justifyContent="space-between"
-                      alignItems="center"
-                      mt="auto"
-                    >
-                      <Box>
-                        <Typography variant="body2">{portfolio.createdBy?.email}</Typography>
-                      </Box>
-                      <IconButton
-                        color="primary"
-                        component="a"
+                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: "auto" }}>
+                      <Button
+                        type="text"
+                        icon={<MailOutlined style={{ color: "#FF7A5A", fontSize: 18 }} />}
                         href={`https://mail.google.com/mail/?view=cm&to=${portfolio.createdBy?.email}`}
                         target="_blank"
-                        rel="noopener noreferrer"
+                        style={{ transition: "transform 0.2s", color: "#FF7A5A" }}
+                        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.2)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+                      />
+                      <Button
+                        type="primary"
+                        style={{
+                          backgroundColor: "#FF7A5A",
+                          borderColor: "#FF7A5A",
+                          transition: "all 0.3s",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = "#FF5733";
+                          e.currentTarget.style.borderColor = "#FF5733";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = "#FF7A5A";
+                          e.currentTarget.style.borderColor = "#FF7A5A";
+                        }}
+                        onClick={() => handleOpenPortfolio(portfolio)}
                       >
-                        <Email sx={{ color: "#FF7A5A" }} />
-                      </IconButton>
-                    </Stack>
+                        View More
+                      </Button>
+                    </div>
+                  </Card>
+                </motion.div>
+              </Col>
+            ))}
+          </Row>
+        )}
 
-                    <Button
-                      fullWidth
-                      size="small"
-                      sx={{
-                        mt: 1,
-                        bgcolor: "#FF7A5A",
-                        color: "#fff",
-                        "&:hover": { bgcolor: "#e7643f" },
-                      }}
-                      onClick={() => handleOpen(portfolio)}
-                    >
-                      View More
-                    </Button>
-                  </MotionCard>
-                </Grid>
-              ))}
-            </Grid>
-          )}
+        {selectedPortfolio && (
+          <ViewBuilderModal
+            open={open}
+            handleClose={handleClosePortfolio}
+            portfolio={selectedPortfolio}
+            onPastWorkClick={handleOpenPastWork}
+            darkTheme
+          />
+        )}
 
-          {selectedPortfolio && (
-            <ViewBuilderModal
-              open={open}
-              handleClose={handleClose}
-              portfolio={selectedPortfolio}
-            />
-          )}
-        </Container>
-      </Box>
-    </Box>
+        {selectedWork && (
+          <PastWorkViewModal
+            open={pastWorkOpen}
+            handleClose={handleClosePastWork}
+            portfolio={selectedPortfolio}
+            work={selectedWork}
+
+          />
+        )}
+      </div>
+    </div>
   );
 };
 

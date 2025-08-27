@@ -1,3 +1,4 @@
+// ConfirmModal.jsx
 import React from "react";
 import { Modal, Box, Typography, Button, Stack, Backdrop } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,7 +13,9 @@ const ConfirmModal = ({ open, onClose, onConfirm, message = "Are you sure?" }) =
           open={open}
           onClose={onClose}
           closeAfterTransition
-          sx={{ display: "flex", alignItems: "flex-end", justifyContent: "center" }}
+          BackdropComponent={Backdrop}
+          BackdropProps={{ sx: { backgroundColor: "rgba(0,0,0,0.45)" } }}
+          sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
         >
           <MotionBox
             initial={{ y: "100%", opacity: 0, scale: 0.95 }}
@@ -20,21 +23,20 @@ const ConfirmModal = ({ open, onClose, onConfirm, message = "Are you sure?" }) =
             exit={{ y: "100%", opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
             sx={{
-              bgcolor: "#fff",
-              borderTopLeftRadius: 16,
-              borderTopRightRadius: 16,
+              bgcolor: "#1e1e1e",
+              borderRadius: 4,
               width: "100%",
               maxWidth: 420,
               p: 4,
               textAlign: "center",
-              boxShadow: "0 -4px 25px rgba(0,0,0,0.25)",
-              border: "1px solid #f0f0f0",
+              boxShadow: "0 -4px 25px rgba(0,0,0,0.5)",
+              color: "#fff",
             }}
           >
-            <Typography variant="h6" fontWeight={600} mb={2} color="#333">
+            <Typography variant="h6" fontWeight={600} mb={2} color="#FF7A5A">
               Confirm Action
             </Typography>
-            <Typography variant="body2" mb={4} color="#555">
+            <Typography variant="body2" mb={4} color="#ccc">
               {message}
             </Typography>
             <Stack direction="row" spacing={2} justifyContent="center">
@@ -45,9 +47,9 @@ const ConfirmModal = ({ open, onClose, onConfirm, message = "Are you sure?" }) =
                   px: 3,
                   borderRadius: 2,
                   textTransform: "none",
-                  color: "#555",
-                  borderColor: "#ddd",
-                  "&:hover": { borderColor: "#bbb", bgcolor: "#f5f5f5" },
+                  color: "#ccc",
+                  borderColor: "#555",
+                  "&:hover": { borderColor: "#FF7A5A", bgcolor: "rgba(255,122,90,0.1)" },
                 }}
               >
                 Cancel

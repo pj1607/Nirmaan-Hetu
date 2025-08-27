@@ -13,9 +13,8 @@ import {
 } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "react-hot-toast";
-import { Close, Delete, Upload } from "@mui/icons-material";
+import { Close } from "@mui/icons-material";
 import EditIcon from "@mui/icons-material/Edit";
-import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 
 const API = import.meta.env.VITE_API_URL;
@@ -90,10 +89,10 @@ const ProfileModal = ({ open, handleClose }) => {
             exit={{ y: "100%", opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
             sx={{
-              bgcolor: "#eed9d9ff",
+              bgcolor: "#1e1e1e",
               borderTopLeftRadius: 16,
               borderTopRightRadius: 16,
-              width: "100%",
+              width: "95%",
               maxWidth: 450,
               p: 4,
               boxShadow: "0 -6px 30px rgba(0,0,0,0.25)",
@@ -103,20 +102,27 @@ const ProfileModal = ({ open, handleClose }) => {
               overflowY: "auto",
             }}
           >
-             <IconButton onClick={handleClose} aria-label="Close" sx={{
+            <IconButton
+              onClick={handleClose}
+              aria-label="Close"
+              sx={{
                 position: "absolute",
                 top: 12,
                 right: 12,
-              }}><Close /></IconButton>
+                color: "#fff",
+              }}
+            >
+              <Close />
+            </IconButton>
 
             <Stack spacing={1.5} alignItems="center" sx={{ mb: 3 }}>
-              <Avatar sx={{ width: 64, height: 64, bgcolor: "#343333ff" }}>
+              <Avatar sx={{ width: 64, height: 64, bgcolor: "#343333" }}>
                 {userName[0]?.toUpperCase()}
               </Avatar>
               <Typography variant="h6" fontWeight={600} sx={{ color: "#FF7A5A" }}>
                 Profile Settings
               </Typography>
-              <Typography variant="body2" sx={{ color: "#333", px: 2 }}>
+              <Typography variant="body2" sx={{ color: "#ccc", px: 2 }}>
                 Your current profile information
               </Typography>
             </Stack>
@@ -129,22 +135,22 @@ const ProfileModal = ({ open, handleClose }) => {
               onChange={(e) => setUserName(e.target.value)}
               InputProps={{
                 readOnly: !isNameEditable,
-                style: { color: "#000", cursor: isNameEditable ? "text" : "default" },
+                style: { color: "#fff", cursor: isNameEditable ? "text" : "default" },
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={() => setIsNameEditable(!isNameEditable)} sx={{ color: "#f44336" }}>
+                    <IconButton onClick={() => setIsNameEditable(!isNameEditable)} sx={{ color: "#FF7A5A" }}>
                       <EditIcon fontSize="small" />
                     </IconButton>
                   </InputAdornment>
                 ),
               }}
-              InputLabelProps={{ style: { color: "#333" } }}
+              InputLabelProps={{ style: { color: "#ccc" } }}
               sx={{
                 mb: 2,
-                bgcolor: "#fff8f8",
+                bgcolor: "#2a2a2a",
                 borderRadius: 1.5,
-                "& .MuiOutlinedInput-notchedOutline": { borderColor: "#ddd" },
-                "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#f44336" },
+                "& .MuiOutlinedInput-notchedOutline": { borderColor: "#444" },
+                "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#FF7A5A" },
               }}
             />
 
@@ -156,22 +162,22 @@ const ProfileModal = ({ open, handleClose }) => {
               onChange={(e) => setEmail(e.target.value)}
               InputProps={{
                 readOnly: !isEmailEditable,
-                style: { color: "#000", cursor: isEmailEditable ? "text" : "default" },
+                style: { color: "#fff", cursor: isEmailEditable ? "text" : "default" },
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={() => setIsEmailEditable(!isEmailEditable)} sx={{ color: "#f44336" }}>
+                    <IconButton onClick={() => setIsEmailEditable(!isEmailEditable)} sx={{ color: "#FF7A5A" }}>
                       <EditIcon fontSize="small" />
                     </IconButton>
                   </InputAdornment>
                 ),
               }}
-              InputLabelProps={{ style: { color: "#333" } }}
+              InputLabelProps={{ style: { color: "#ccc" } }}
               sx={{
                 mb: 3,
-                bgcolor: "#fff8f8",
+                bgcolor: "#2a2a2a",
                 borderRadius: 1.5,
-                "& .MuiOutlinedInput-notchedOutline": { borderColor: "#ddd" },
-                "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#f44336" },
+                "& .MuiOutlinedInput-notchedOutline": { borderColor: "#444" },
+                "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#FF7A5A" },
               }}
             />
 
@@ -189,7 +195,7 @@ const ProfileModal = ({ open, handleClose }) => {
                 "&:hover": { bgcolor: "#e7643f" },
               }}
             >
-              {loading ? <CircularProgress size={26} sx={{ color: "white" }} /> : "Save Changes"}
+              {loading ? <CircularProgress size={26} sx={{ color: "#fff" }} /> : "Save Changes"}
             </Button>
           </MotionBox>
         </Modal>
