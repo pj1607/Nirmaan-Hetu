@@ -246,25 +246,24 @@ const [demoLoading, setDemoLoading] = useState({
               >
                 {renderBtnContent()}
               </Button>
-
 <Button
   onClick={() => handleDemoLogin("owner")}
   fullWidth
   variant="outlined"
   disabled={demoLoading.owner}
-    sx={{
-    py: 0.7,
-    fontSize: "0.85rem",
-    fontWeight: 600,
-    borderRadius: "0.8rem",
+  sx={{
+    py: 0.5,                     // smaller vertical padding
+    fontSize: "0.75rem",          // smaller text
+    fontWeight: 500,              // lighter weight
+    borderRadius: "0.5rem",       // smaller radius
     textTransform: "none",
-    backdropFilter: "blur(8px)",
-    bgcolor: "rgba(58, 59, 59, 0.1)",  
+    backdropFilter: "blur(6px)",
+    bgcolor: "rgba(58, 59, 59, 0.05)",  
     color: "#e0e0e0",
     border: "1px solid rgba(255,255,255,0.15)",
     transition: "all 0.25s ease-in-out",
     "&:hover": {
-      bgcolor: "rgba(65, 65, 65, 0.2)",
+      bgcolor: "rgba(65, 65, 65, 0.15)",
     },
     "&.Mui-disabled": {
       bgcolor: "rgba(255,255,255,0.02)",
@@ -273,9 +272,9 @@ const [demoLoading, setDemoLoading] = useState({
   }}
 >
   {demoLoading.owner ? (
-    <CircularProgress size={18} sx={{ color: "#e0e0e0" }} />
+    <CircularProgress size={16} sx={{ color: "#e0e0e0" }} />
   ) : (
-    "Demo as Owner"
+    "Demo Owner"
   )}
 </Button>
 
@@ -285,18 +284,18 @@ const [demoLoading, setDemoLoading] = useState({
   variant="outlined"
   disabled={demoLoading.builder}
   sx={{
-    py: 0.7,
-    fontSize: "0.85rem",
-    fontWeight: 600,
-    borderRadius: "0.8rem",
+    py: 0.5,
+    fontSize: "0.75rem",
+    fontWeight: 500,
+    borderRadius: "0.5rem",
     textTransform: "none",
-    backdropFilter: "blur(8px)",
-    bgcolor: "rgba(58, 59, 59, 0.1)",  
+    backdropFilter: "blur(6px)",
+    bgcolor: "rgba(58, 59, 59, 0.05)",  
     color: "#e0e0e0",
     border: "1px solid rgba(255,255,255,0.15)",
     transition: "all 0.25s ease-in-out",
     "&:hover": {
-      bgcolor: "rgba(65, 65, 65, 0.2)",
+      bgcolor: "rgba(65, 65, 65, 0.15)",
     },
     "&.Mui-disabled": {
       bgcolor: "rgba(255,255,255,0.02)",
@@ -305,11 +304,12 @@ const [demoLoading, setDemoLoading] = useState({
   }}
 >
   {demoLoading.builder ? (
-    <CircularProgress size={18} sx={{ color: "#e0e0e0" }} />
+    <CircularProgress size={16} sx={{ color: "#e0e0e0" }} />
   ) : (
-    "Demo as Builder"
+    "Demo Builder"
   )}
 </Button>
+
 
 
             </Stack>
