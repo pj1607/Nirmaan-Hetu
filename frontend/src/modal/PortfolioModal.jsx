@@ -33,7 +33,7 @@ const Field = React.memo(function Field({ label, name, type = "text", multiline 
       sx={{
         bgcolor: "#2c2c2c",
         borderRadius: 1.5,
-        "& .MuiOutlinedInput-notchedOutline": { borderColor: "#555" },
+        
         "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#FF7A5A" },
         "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#FF7A5A" },
         "& input": { color: "white" },

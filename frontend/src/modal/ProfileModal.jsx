@@ -149,7 +149,12 @@ const ProfileModal = ({ open, handleClose }) => {
                 mb: 2,
                 bgcolor: "#2a2a2a",
                 borderRadius: 1.5,
-                "& .MuiOutlinedInput-notchedOutline": { borderColor: "#444" },
+                 "& .MuiOutlinedInput-root": {
+      "& fieldset": { borderColor: "#444" },
+      "&:hover fieldset": { borderColor: "#FF7A5A" },
+      "&.Mui-focused fieldset": { borderColor: "#FF7A5A" }, 
+    },
+
                 "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#FF7A5A" },
               }}
             />
@@ -176,8 +181,14 @@ const ProfileModal = ({ open, handleClose }) => {
                 mb: 3,
                 bgcolor: "#2a2a2a",
                 borderRadius: 1.5,
-                "& .MuiOutlinedInput-notchedOutline": { borderColor: "#444" },
+                "& .MuiOutlinedInput-root": {
+      "& fieldset": { borderColor: "#444" },
+      "&:hover fieldset": { borderColor: "#FF7A5A" },
+      "&.Mui-focused fieldset": { borderColor: "#FF7A5A" },
+    },
+
                 "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#FF7A5A" },
+                
               }}
             />
 
