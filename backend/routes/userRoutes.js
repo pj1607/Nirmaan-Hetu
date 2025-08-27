@@ -6,7 +6,7 @@ const router = express.Router();
 
 
 router.get('/ping', (req, res) => {
-  res.status(200).json({ message: 'pong' });
+  res.status(200).send("pong");
 });
 
 
