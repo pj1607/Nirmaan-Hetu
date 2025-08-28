@@ -172,7 +172,7 @@ const DashboardB = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", position: "relative"}}>
+    <Box sx={{ display: "flex", minHeight: "95vh", position: "relative"}}>
       <Sidebar role="builder" />
 
       <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, sm: 3 }, position: "relative" }}>
