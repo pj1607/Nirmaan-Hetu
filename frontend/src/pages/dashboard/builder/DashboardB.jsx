@@ -185,94 +185,144 @@ const DashboardB = () => {
           transition={{ duration: 0.5 }}
           style={{ position: "relative", zIndex: 1 }}
         >
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6} md={4}>
-              <MotionCard
-                variants={cardVariant}
-                initial="hidden"
-                animate="visible"
-                whileHover={{ scale: 1.02 }}
-                sx={{
-                  borderRadius: 3,
-                  background: "#1e1e1e",
-                  border: "1px solid #333",
-                  boxShadow: "0 5px 15px rgba(0,0,0,0.3)",
-                  overflow: "hidden",
-                }}
-              >
-                <CardContent>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      mb: 2,
-                      color: "#FF7A5A",
-                      fontWeight: 600,
-                      fontSize: { xs: "1rem", sm: "1.1rem" },
-                    }}
-                  >
-                    Portfolio
-                  </Typography>
-                  <Divider sx={{ mb: 2, borderColor: "#444" }} />
+        <Grid container spacing={3}>
+  {/* Portfolio Card */}
+  <Grid item xs={12} sm={6} md={4}>
+    <MotionCard
+      variants={cardVariant}
+      initial="hidden"
+      animate="visible"
+      whileHover={{ scale: 1.02 }}
+      sx={{
+        borderRadius: 3,
+        background: "#1e1e1e",
+        border: "1px solid #333",
+        boxShadow: "0 5px 15px rgba(0,0,0,0.3)",
+        overflow: "hidden",
+      }}
+    >
+      <CardContent>
+        <Typography
+          variant="h6"
+          sx={{
+            mb: 2,
+            color: "#FF7A5A",
+            fontWeight: 600,
+            fontSize: { xs: "1rem", sm: "1.1rem" },
+          }}
+        >
+          Portfolio
+        </Typography>
+        <Divider sx={{ mb: 2, borderColor: "#444" }} />
 
-                  {loading ? (
-                    <Box display="flex" justifyContent="center" alignItems="center" minHeight={100}>
-                      <CircularProgress color="#fff" />
-                    </Box>
-                  ) : (
-                    <Stack
-                      direction="row"
-                      spacing={2}
-                      flexWrap="wrap"
-                      justifyContent={{ xs: "center", sm: "flex-start" }}
-                    >
-                      {firstThreeImages.length > 0
-                        ? firstThreeImages.map((img, idx) => (
-                            <MotionBox
-                              key={idx}
-                              whileHover={{ scale: 1.05 }}
-                              sx={{
-                                width: { xs: 70, sm: 100 },
-                                height: { xs: 90, sm: 80 },
-                                borderRadius: 2,
-                                backgroundImage: `url(${img})`,
-                                backgroundSize: "cover",
-                                backgroundPosition: "center",
-                                border: "1px solid #333",
-                              }}
-                            />
-                          ))
-                        : [1, 2, 3].map((i) => (
-                            <MotionBox
-                              key={i}
-                              whileHover={{ scale: 1.05 }}
-                              sx={{
-                                width: { xs: 70, sm: 100 },
-                                height: { xs: 90, sm: 80 },
-                                borderRadius: 2,
-                                bgcolor: "#2a2a2a",
-                                border: "1px solid #333",
-                              }}
-                            />
-                          ))}
-                    </Stack>
-                  )}
-
-                  <Button
-                    fullWidth
-                    onClick={() => setOpen(true)}
+        {loading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight={100}>
+            <CircularProgress color="#inherit" />
+          </Box>
+        ) : (
+          <Stack
+            direction="row"
+            spacing={2}
+            flexWrap="wrap"
+            justifyContent={{ xs: "center", sm: "flex-start" }}
+          >
+            {firstThreeImages.length > 0
+              ? firstThreeImages.map((img, idx) => (
+                  <MotionBox
+                    key={idx}
+                    whileHover={{ scale: 1.05 }}
                     sx={{
-                      mt: 2,
-                      bgcolor: "#FF7A5A",
-                      color: "#fff",
-                      "&:hover": { bgcolor: "#e7643f" },
+                      width: { xs: 70, sm: 100 },
+                      height: { xs: 90, sm: 80 },
+                      borderRadius: 2,
+                      backgroundImage: `url(${img})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      border: "1px solid #333",
                     }}
-                  >
-                    Manage Portfolio
-                  </Button>
-                </CardContent>
-              </MotionCard>
-            </Grid>
-          </Grid>
+                  />
+                ))
+              : [1, 2, 3].map((i) => (
+                  <MotionBox
+                    key={i}
+                    whileHover={{ scale: 1.05 }}
+                    sx={{
+                      width: { xs: 70, sm: 100 },
+                      height: { xs: 90, sm: 80 },
+                      borderRadius: 2,
+                      bgcolor: "#2a2a2a",
+                      border: "1px solid #333",
+                    }}
+                  />
+                ))}
+          </Stack>
+        )}
+
+        <Button
+          fullWidth
+          onClick={() => setOpen(true)}
+          sx={{
+            mt: 2,
+            bgcolor: "#FF7A5A",
+            color: "#fff",
+            "&:hover": { bgcolor: "#e7643f" },
+          }}
+        >
+          Manage Portfolio
+        </Button>
+      </CardContent>
+    </MotionCard>
+  </Grid>
+
+  {/* Past Works Count Card */}
+  <Grid item xs={12} sm={6} md={4}>
+    <MotionCard
+      variants={cardVariant}
+      initial="hidden"
+      animate="visible"
+      whileHover={{ scale: 1.02 }}
+      sx={{
+        borderRadius: 3,
+        background: "#1e1e1e",
+        border: "1px solid #333",
+        boxShadow: "0 5px 15px rgba(0,0,0,0.3)",
+        textAlign: "center",
+        py: 4,
+      }}
+    >
+      <CardContent>
+        <Typography
+          variant="h6"
+          sx={{
+            mt:-4,
+            mb: 2,
+            color: "#FF7A5A",
+            fontWeight: 600,
+            fontSize: { xs: "1rem", sm: "1.1rem" },
+          }}
+        >
+          Past Works Added
+        </Typography>
+        <Divider sx={{ mb: 2, borderColor: "#444" }} />
+
+        {loading ? (
+          <CircularProgress />
+        ) : (
+          <Typography
+            variant="h3"
+            sx={{
+              fontWeight: 700,
+              color: "#fff",
+            }}
+          >
+            {portfolio?.pastWorks?.length || 0}
+          </Typography>
+        )}
+      </CardContent>
+    </MotionCard>
+  </Grid>
+</Grid>
+
         </motion.div>
       </Box>
 
