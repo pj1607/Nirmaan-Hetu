@@ -9,6 +9,115 @@ import PastWorkViewModal from "../../../modal/PastWorkViewModal";
 
 const API = import.meta.env.VITE_API_URL;
 
+const HeaderBanner = () => {
+  return (
+    <div
+      style={{
+        position: "relative",
+        width: "100%",
+        height: 160,
+        marginBottom: 20,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        paddingLeft: 20,
+        overflow: "hidden", 
+        borderRadius: 12,
+      }}
+    >
+      {/* Decorative SVGs in background */}
+      <svg
+        style={{
+          position: "absolute",
+          top: 10,
+          right: 40,
+          opacity: 0.2,
+          transform: "rotate(15deg)",
+        }}
+        width="60"
+        height="60"
+        viewBox="0 0 100 100"
+      >
+        <circle cx="50" cy="50" r="40" stroke="#FF7A5A" strokeWidth="4" fill="none" />
+      </svg>
+
+      <svg
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: "30%",
+          opacity: 0.15,
+        }}
+        width="80"
+        height="80"
+        viewBox="0 0 100 100"
+      >
+        <rect x="20" y="20" width="60" height="60" stroke="#FF7A5A" strokeWidth="4" fill="none" />
+      </svg>
+
+      <svg
+        style={{
+          position: "absolute",
+          top: "30%",
+          right: "15%",
+          opacity: 0.12,
+        }}
+        width="70"
+        height="70"
+        viewBox="0 0 100 100"
+      >
+        <polygon
+          points="50,10 90,90 10,90"
+          stroke="#FF7A5A"
+          strokeWidth="3"
+          fill="none"
+        />
+      </svg>
+
+      {/* House icon (main logo) */}
+      <svg
+        width="40"
+        height="40"
+        viewBox="0 0 72 72"
+        style={{
+          marginRight: 12,
+          minWidth: 32,
+          zIndex: 2,
+        }}
+      >
+        <g stroke="#FF7A5A" strokeWidth={2} fill="none">
+          <path d="M12 50 L36 28 L60 50 Z" />
+          <rect x="18" y="50" width="36" height="24" />
+          <path d="M36 50 L36 74" />
+        </g>
+      </svg>
+
+      {/* Text content */}
+      <div style={{ color: "#fff", zIndex: 2 }}>
+        <Typography.Title
+          level={3}
+          style={{
+            margin: 0,
+            color: "#fff",
+            fontSize: "clamp(16px, 2.5vw, 24px)",
+          }}
+        >
+          Explore Builders & Portfolios
+        </Typography.Title>
+        <Typography.Text
+          style={{
+            color: "#ccc",
+            fontSize: "clamp(12px, 2vw, 16px)",
+          }}
+        >
+          Find trusted builders near you
+        </Typography.Text>
+      </div>
+    </div>
+  );
+};
+
+
 const DashboardO = () => {
   const [portfolios, setPortfolios] = useState([]);
   const [selectedPortfolio, setSelectedPortfolio] = useState(null);
@@ -23,11 +132,11 @@ const DashboardO = () => {
   };
   const handleClosePortfolio = () => setOpen(false);
 
-const handleOpenPastWork = (work, portfolio) => {
-  setSelectedPortfolio(portfolio);
-  setSelectedWork(work);
-  setPastWorkOpen(true);
-};
+  const handleOpenPastWork = (work, portfolio) => {
+    setSelectedPortfolio(portfolio);
+    setSelectedWork(work);
+    setPastWorkOpen(true);
+  };
 
   const handleClosePastWork = () => setPastWorkOpen(false);
 
@@ -54,9 +163,12 @@ const handleOpenPastWork = (work, portfolio) => {
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", marginTop: 70, color: "#fff" }}>
+    <div style={{ display: "flex", minHeight: "100vh", marginTop: 20, color: "#fff" }}>
       <Sidebar role="owner" />
       <div style={{ flexGrow: 1, padding: 24 }}>
+        {/* Header banner with SVG overlay above the hero image */}
+        <HeaderBanner />
+
         {loading ? (
           <Row gutter={[24, 24]}>
             {[...Array(6)].map((_, idx) => (
@@ -84,12 +196,12 @@ const handleOpenPastWork = (work, portfolio) => {
                   <Card
                     hoverable
                     style={{
-                          boxShadow: "none", 
-                          border: "none",     
+                      boxShadow: "none",
+                      border: "none",
                       borderRadius: 16,
                       overflow: "hidden",
                       transition: "transform 0.3s, box-shadow 0.3s",
-                      height: 200,
+                      height: 250,
                       display: "flex",
                       flexDirection: "column",
                       backgroundColor: "#1e1e1e",
@@ -108,7 +220,7 @@ const handleOpenPastWork = (work, portfolio) => {
                         size={64}
                         src={portfolio.logo?.url}
                         style={{
-                          backgroundColor: portfolio.logo ? "transparent" : "#FF7A5A",
+                          backgroundColor: portfolio.logo ? "transparent" : "#393837ff",
                           marginRight: 16,
                           fontSize: 24,
                           color: "#fff",
@@ -146,7 +258,7 @@ const handleOpenPastWork = (work, portfolio) => {
                           color="default"
                           key={idx}
                           style={{ cursor: "pointer", backgroundColor: "#333", color: "#fff" }}
-                          onClick={() => handleOpenPastWork(work, portfolio)} 
+                          onClick={() => handleOpenPastWork(work, portfolio)}
                         >
                           {work.title}
                         </Tag>
@@ -199,16 +311,14 @@ const handleOpenPastWork = (work, portfolio) => {
           />
         )}
 
-  {selectedWork && (
-  <PastWorkViewModal
-    open={pastWorkOpen}
-    handleClose={handleClosePastWork}
-    portfolio={selectedPortfolio}
-    work={selectedWork}
-  />
-)}
-
-
+        {selectedWork && (
+          <PastWorkViewModal
+            open={pastWorkOpen}
+            handleClose={handleClosePastWork}
+            portfolio={selectedPortfolio}
+            work={selectedWork}
+          />
+        )}
       </div>
     </div>
   );
