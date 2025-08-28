@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Typography, Avatar, Button, Tag, Row, Col, Card, Skeleton } from "antd";
-import { MailOutlined } from "@ant-design/icons";
+import {
+  Typography,
+  Avatar,
+  Button,
+  Tag,
+  Row,
+  Col,
+  Card,
+  Skeleton,
+  Input,
+} from "antd";
+import { MailOutlined, SearchOutlined } from "@ant-design/icons";
 import Sidebar from "../../../components/Sidebar";
 import axios from "axios";
 import { motion } from "framer-motion";
@@ -8,6 +18,8 @@ import ViewBuilderModal from "../../../modal/ViewBuilderModal";
 import PastWorkViewModal from "../../../modal/PastWorkViewModal";
 
 const API = import.meta.env.VITE_API_URL;
+
+const { Search } = Input;
 
 const HeaderBanner = () => {
   return (
@@ -21,11 +33,10 @@ const HeaderBanner = () => {
         alignItems: "center",
         justifyContent: "flex-start",
         paddingLeft: 20,
-        overflow: "hidden", 
-        borderRadius: 12,
+        overflow: "hidden",
       }}
     >
-      {/* Decorative SVGs in background */}
+      {/* Decorative SVGs */}
       <svg
         style={{
           position: "absolute",
@@ -38,7 +49,14 @@ const HeaderBanner = () => {
         height="60"
         viewBox="0 0 100 100"
       >
-        <circle cx="50" cy="50" r="40" stroke="#FF7A5A" strokeWidth="4" fill="none" />
+        <circle
+          cx="50"
+          cy="50"
+          r="40"
+          stroke="#FF7A5A"
+          strokeWidth="4"
+          fill="none"
+        />
       </svg>
 
       <svg
@@ -52,7 +70,15 @@ const HeaderBanner = () => {
         height="80"
         viewBox="0 0 100 100"
       >
-        <rect x="20" y="20" width="60" height="60" stroke="#FF7A5A" strokeWidth="4" fill="none" />
+        <rect
+          x="20"
+          y="20"
+          width="60"
+          height="60"
+          stroke="#FF7A5A"
+          strokeWidth="4"
+          fill="none"
+        />
       </svg>
 
       <svg
@@ -74,7 +100,7 @@ const HeaderBanner = () => {
         />
       </svg>
 
-      {/* House icon (main logo) */}
+      {/* House icon */}
       <svg
         width="40"
         height="40"
@@ -92,7 +118,7 @@ const HeaderBanner = () => {
         </g>
       </svg>
 
-      {/* Text content */}
+      {/* Text */}
       <div style={{ color: "#fff", zIndex: 2 }}>
         <Typography.Title
           level={3}
@@ -117,14 +143,15 @@ const HeaderBanner = () => {
   );
 };
 
-
 const DashboardO = () => {
   const [portfolios, setPortfolios] = useState([]);
+  const [filteredPortfolios, setFilteredPortfolios] = useState([]);
   const [selectedPortfolio, setSelectedPortfolio] = useState(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedWork, setSelectedWork] = useState(null);
   const [pastWorkOpen, setPastWorkOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleOpenPortfolio = (portfolio) => {
     setSelectedPortfolio(portfolio);
@@ -148,6 +175,7 @@ const DashboardO = () => {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         setPortfolios(res.data.portfolios);
+        setFilteredPortfolios(res.data.portfolios);
       } catch (err) {
         console.error("Failed to fetch portfolios:", err);
       } finally {
@@ -157,35 +185,91 @@ const DashboardO = () => {
     fetchPortfolios();
   }, []);
 
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+    if (!value.trim()) {
+      setFilteredPortfolios(portfolios);
+      return;
+    }
+    const lower = value.toLowerCase();
+    const filtered = portfolios.filter((p) => {
+      const company = p.company?.toLowerCase() || "";
+      const username = p.createdBy?.username?.toLowerCase() || "";
+      const works = p.pastWorks?.some((w) =>
+        w.title?.toLowerCase().includes(lower)
+      );
+      return (
+        company.includes(lower) || username.includes(lower) || works
+      );
+    });
+    setFilteredPortfolios(filtered);
+  };
+
   const cardVariants = {
     hidden: { opacity: 0, y: 30 },
     visible: { opacity: 1, y: 0 },
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", marginTop: 20, color: "#fff" }}>
+    <div
+      style={{
+        display: "flex",
+        minHeight: "100vh",
+        marginTop: 20,
+        color: "#fff",
+      }}
+    >
       <Sidebar role="owner" />
       <div style={{ flexGrow: 1, padding: 24 }}>
-        {/* Header banner with SVG overlay above the hero image */}
+        {/* Header */}
         <HeaderBanner />
+
+        {/* Search Bar */}
+        <div style={{ marginBottom: 24, maxWidth: 400 }}>
+          <Search
+            placeholder="Search by company, builder or past work"
+            allowClear
+            enterButton={<SearchOutlined />}
+            size="large"
+            value={searchTerm}
+            onChange={(e) => handleSearch(e.target.value)}
+            onSearch={handleSearch}
+            style={{
+              backgroundColor: "#1e1e1e",
+              borderRadius: 8,
+              border: "1px solid #444",
+              color: "#fff",
+            }}
+          />
+        </div>
 
         {loading ? (
           <Row gutter={[24, 24]}>
             {[...Array(6)].map((_, idx) => (
               <Col xs={24} sm={12} md={8} key={idx}>
-                <Skeleton active paragraph={{ rows: 4 }} style={{ backgroundColor: "#1f1f1f" }} />
+                <Skeleton
+                  active
+                  paragraph={{ rows: 4 }}
+                  style={{ backgroundColor: "#1f1f1f" }}
+                />
               </Col>
             ))}
           </Row>
-        ) : portfolios.length === 0 ? (
+        ) : filteredPortfolios.length === 0 ? (
           <Typography.Text
-            style={{ display: "block", textAlign: "center", marginTop: 50, fontSize: 18, color: "#aaa" }}
+            style={{
+              display: "block",
+              textAlign: "center",
+              marginTop: 50,
+              fontSize: 18,
+              color: "#aaa",
+            }}
           >
             No portfolios found.
           </Typography.Text>
         ) : (
           <Row gutter={[24, 24]}>
-            {portfolios.map((portfolio, idx) => (
+            {filteredPortfolios.map((portfolio, idx) => (
               <Col xs={24} sm={12} md={8} key={portfolio._id}>
                 <motion.div
                   initial="hidden"
@@ -207,7 +291,12 @@ const DashboardO = () => {
                       backgroundColor: "#1e1e1e",
                       color: "#fff",
                     }}
-                    bodyStyle={{ padding: 16, display: "flex", flexDirection: "column", flexGrow: 1 }}
+                    bodyStyle={{
+                      padding: 16,
+                      display: "flex",
+                      flexDirection: "column",
+                      flexGrow: 1,
+                    }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = "scale(1.03)";
                     }}
@@ -215,29 +304,47 @@ const DashboardO = () => {
                       e.currentTarget.style.transform = "scale(1)";
                     }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", marginBottom: 12 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        marginBottom: 12,
+                      }}
+                    >
                       <Avatar
                         size={64}
                         src={portfolio.logo?.url}
                         style={{
-                          backgroundColor: portfolio.logo ? "transparent" : "#393837ff",
+                          backgroundColor: portfolio.logo
+                            ? "transparent"
+                            : "#393837ff",
                           marginRight: 16,
                           fontSize: 24,
                           color: "#fff",
                         }}
                       >
-                        {!portfolio.logo?.url && portfolio.company?.charAt(0)?.toUpperCase()}
+                        {!portfolio.logo?.url &&
+                          portfolio.company?.charAt(0)?.toUpperCase()}
                       </Avatar>
                       <div>
-                        <Typography.Text strong style={{ fontSize: 16, color: "#fff" }}>
+                        <Typography.Text
+                          strong
+                          style={{ fontSize: 16, color: "#fff" }}
+                        >
                           {portfolio.company}
                         </Typography.Text>
                         <br />
-                        <Typography.Text type="secondary" style={{ color: "#aaa" }}>
+                        <Typography.Text
+                          type="secondary"
+                          style={{ color: "#aaa" }}
+                        >
                           {portfolio.createdBy?.username}
                         </Typography.Text>
                         <br />
-                        <Typography.Text type="secondary" style={{ color: "#aaa" }}>
+                        <Typography.Text
+                          type="secondary"
+                          style={{ color: "#aaa" }}
+                        >
                           {portfolio.experience} yrs experience
                         </Typography.Text>
                       </div>
@@ -257,7 +364,11 @@ const DashboardO = () => {
                         <Tag
                           color="default"
                           key={idx}
-                          style={{ cursor: "pointer", backgroundColor: "#333", color: "#fff" }}
+                          style={{
+                            cursor: "pointer",
+                            backgroundColor: "#333",
+                            color: "#fff",
+                          }}
                           onClick={() => handleOpenPastWork(work, portfolio)}
                         >
                           {work.title}
@@ -265,15 +376,32 @@ const DashboardO = () => {
                       ))}
                     </div>
 
-                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: "auto" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginTop: "auto",
+                      }}
+                    >
                       <Button
                         type="text"
-                        icon={<MailOutlined style={{ color: "#FF7A5A", fontSize: 18 }} />}
+                        icon={
+                          <MailOutlined
+                            style={{ color: "#FF7A5A", fontSize: 18 }}
+                          />
+                        }
                         href={`https://mail.google.com/mail/?view=cm&to=${portfolio.createdBy?.email}`}
                         target="_blank"
-                        style={{ transition: "transform 0.2s", color: "#FF7A5A" }}
-                        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.2)")}
-                        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+                        style={{
+                          transition: "transform 0.2s",
+                          color: "#FF7A5A",
+                        }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.transform = "scale(1.2)")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.transform = "scale(1)")
+                        }
                       />
                       <Button
                         type="primary"
