@@ -225,20 +225,21 @@ const DashboardO = () => {
         <HeaderBanner />
 
         {/* Search Bar */}
+        {/* Search Bar */}
         <div style={{ marginBottom: 24, maxWidth: 400 }}>
-          <Search
+          <input
+            type="text"
             placeholder="Search by company, builder or past work"
-            allowClear
-            enterButton={<SearchOutlined />}
-            size="large"
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            onSearch={handleSearch}
             style={{
-              backgroundColor: "#1e1e1e",
+              width: "100%",
+              padding: "10px 16px",
               borderRadius: 8,
               border: "1px solid #444",
+              backgroundColor: "#1e1e1e",
               color: "#fff",
+              fontSize: 16,
             }}
           />
         </div>

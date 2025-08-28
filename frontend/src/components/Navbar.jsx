@@ -80,10 +80,6 @@ const Navbar = () => {
             alignItems: 'center',
             gap: 1.5,
             cursor: 'pointer',
-            transition: 'transform 0.3s ease-in-out',
-            '&:hover': {
-              transform: 'scale(1.08)',
-            },
           }}
           onClick={() => navigate('/')}
         >
@@ -113,7 +109,7 @@ const Navbar = () => {
                   textTransform: 'none',
                   fontSize: '1rem',
                   transition: 'transform 0.3s ease-in-out',
-                  '&:hover': { color: '#FF7A5A', transform: 'scale(1.08)' },
+                  '&:hover': { color: '#FF7A5A' },
                 }}
               >
                 {loading ? <CircularProgress size={20} color="inherit" /> : item.label}
@@ -128,7 +124,7 @@ const Navbar = () => {
                   textTransform: 'none',
                   fontSize: '1rem',
                   transition: 'transform 0.3s ease-in-out',
-                  '&:hover': { color: '#FF7A5A', transform: 'scale(1.08)' },
+                  '&:hover': { color: '#FF7A5A'},
                 }}
               >
                 {item.label}
@@ -148,7 +144,7 @@ const Navbar = () => {
                   sx={{
                     color: '#000000ff',
                     transition: 'transform 0.3s ease-in-out',
-                    '&:hover': { color: '#FF7A5A', transform: 'scale(1.08)' },
+                    '&:hover': { color: '#FF7A5A' },
                   }}
                 >
                   {loading ? (
@@ -165,7 +161,7 @@ const Navbar = () => {
                   sx={{
                     color: '#000000ff',
                     transition: 'transform 0.3s ease-in-out',
-                    '&:hover': { color: '#FF7A5A', transform: 'scale(1.08)' },
+                    '&:hover': { color: '#FF7A5A'},
                   }}
                 >
                   {item.icon}
