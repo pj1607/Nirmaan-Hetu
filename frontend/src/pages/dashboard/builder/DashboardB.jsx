@@ -45,7 +45,7 @@ const DecorativeSVG = () => (
         opacity: 0.2,
       }}
     >
-      <svg viewBox="0 0 1440 360" width="100%" height="100%" style={{ display: "block" }}>
+      <svg viewBox="0 0 1600 360" width="100%" height="100%" style={{ display: "block" }}>
         <defs>
           <style>{`
             .stroke { stroke: #5b5b5b; stroke-width: 2.1; stroke-linejoin: round; stroke-linecap: round; }
@@ -172,7 +172,7 @@ const DashboardB = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", minHeight: "95vh", position: "relative"}}>
+    <Box sx={{ display: "flex", minHeight: "90vh", position: "relative"}}>
       <Sidebar role="builder" />
 
       <Box component="main" sx={{ flexGrow: 1, p: { xs: 2, sm: 3 }, position: "relative" }}>
