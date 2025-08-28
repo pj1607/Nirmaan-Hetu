@@ -43,11 +43,11 @@ const PastWorkViewModal = ({ open, handleClose, work, portfolio }) => {
             {/* Header: Logo + Company */}
             <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
               <Avatar
-                src={portfolio.logo?.url || undefined}
-                alt={portfolio.company}
+                src={portfolio?.logo?.url || undefined}
+                alt={portfolio?.company}
                 sx={{ width: 56, height: 56, bgcolor: "#343333", color: "#fff", fontWeight: 600 }}
               >
-                {!portfolio.logo?.url && portfolio.company?.charAt(0)?.toUpperCase()}
+                {!portfolio?.logo?.url && portfolio?.company?.charAt(0)?.toUpperCase()}
               </Avatar>
               <Box>
                 <Typography variant="h6" fontWeight={600} sx={{ color: "#FF7A5A" }}>

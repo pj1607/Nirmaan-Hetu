@@ -23,10 +23,12 @@ const DashboardO = () => {
   };
   const handleClosePortfolio = () => setOpen(false);
 
-  const handleOpenPastWork = (work) => {
-    setSelectedWork(work);
-    setPastWorkOpen(true);
-  };
+const handleOpenPastWork = (work, portfolio) => {
+  setSelectedPortfolio(portfolio);
+  setSelectedWork(work);
+  setPastWorkOpen(true);
+};
+
   const handleClosePastWork = () => setPastWorkOpen(false);
 
   useEffect(() => {
@@ -144,7 +146,7 @@ const DashboardO = () => {
                           color="default"
                           key={idx}
                           style={{ cursor: "pointer", backgroundColor: "#333", color: "#fff" }}
-                          onClick={() => handleOpenPastWork(work)}
+                          onClick={() => handleOpenPastWork(work, portfolio)} 
                         >
                           {work.title}
                         </Tag>
@@ -194,19 +196,19 @@ const DashboardO = () => {
             handleClose={handleClosePortfolio}
             portfolio={selectedPortfolio}
             onPastWorkClick={handleOpenPastWork}
-            darkTheme
           />
         )}
 
-        {selectedWork && (
-          <PastWorkViewModal
-            open={pastWorkOpen}
-            handleClose={handleClosePastWork}
-            portfolio={selectedPortfolio}
-            work={selectedWork}
+  {selectedWork && (
+  <PastWorkViewModal
+    open={pastWorkOpen}
+    handleClose={handleClosePastWork}
+    portfolio={selectedPortfolio}
+    work={selectedWork}
+  />
+)}
 
-          />
-        )}
+
       </div>
     </div>
   );
