@@ -1,7 +1,7 @@
 # Nirmaan Hetu
 
 A web application that connects **builders and property owners**.  
-Find and match with builders who meet your dreams — and your demands.
+Find and match with builders who meet your dreams -- and your demands.
 
 ## Highlights
 
