@@ -79,7 +79,7 @@ const HeroBanner = () => {
             color: '#e0d0c0',
           }}
         >
-          Match with builders who meet your dreams — and your demands.
+          Match with builders who meet your dreams - and your demands.
         </Typography>
 
         <Button
