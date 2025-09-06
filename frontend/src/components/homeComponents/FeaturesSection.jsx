@@ -36,7 +36,7 @@ const steps = [
                   transform: 'scale(1.2)',
                 },}} />,
     title: 'Build with Confidence',
-    desc: 'Manage your project with ease, from sketch to keys.',
+    desc: 'Manage your portfolio with ease.',
   },
 ];
 
