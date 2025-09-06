@@ -12,7 +12,7 @@ const steps = [
                   transform: 'scale(1.2)',
                 }, }} />,
     title: 'AI Chat Assistant',
-    desc: 'Instantly get tips on agreements, floor plans, and smart choices.',
+    desc: '"Get quick, friendly tips on paints, décor, ceilings, lighting, and more for your home.',
   },
   {
     icon: <HomeWorkIcon sx={{ fontSize: 48, color: '#FF7A5A', transition: 'all 0.3s ease',
@@ -28,7 +28,7 @@ const steps = [
                   transform: 'scale(1.2)',
                 },}} />,
     title: 'Smart Builder Match',
-    desc: 'We connect you with suitable builders using AI analysis.',
+    desc: 'We connect you with suitable builders.',
   },
   {
     icon: <ConstructionIcon sx={{ fontSize: 48, color: '#FF7A5A' ,transition: 'all 0.3s ease',
