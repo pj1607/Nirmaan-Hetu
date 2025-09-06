@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Box, Typography, Stack, Avatar, Button, Skeleton } from "@mui/material";
+import { Tooltip,Box, Typography, Stack, Avatar, Button, Skeleton } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { Email, LocationOn, NearMe } from "@mui/icons-material";
 import axios from "axios";
@@ -138,7 +138,7 @@ const ViewBuilderPage = () => {
 
 
       {/* Header */}
-      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="center" sx={{ position: "relative", zIndex: 1,mt:5 }}>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="center" sx={{ position: "relative", zIndex: 1,mt:7 }}>
         {loading ? (
           <Skeleton variant="circular" width={80} height={80} />
         ) : (
@@ -167,20 +167,22 @@ const ViewBuilderPage = () => {
               <Typography variant="body2" sx={{ color: "#ccc" }}>
                 {portfolio.address}
               </Typography>
-              <Button
-                variant="contained"
-                sx={{
-                  minWidth: 40,
-                  height: 35,
-                  borderRadius: "16px",
-                  bgcolor: "rgba(255, 122, 90, 0.85)",
-                  boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-                  "&:hover": { bgcolor: "rgba(211, 90, 56, 0.95)" },
-                }}
-                onClick={getDirections}
-              >
-                <NearMe sx={{ fontSize: 22 }} />
-              </Button>
+            <Tooltip title="Get Directions" arrow placement="top">
+  <Button
+    variant="contained"
+    sx={{
+      minWidth: 40,
+      height: 35,
+      borderRadius: "16px",
+      bgcolor: "rgba(255, 122, 90, 0.85)",
+      boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+      "&:hover": { bgcolor: "rgba(211, 90, 56, 0.95)" },
+    }}
+    onClick={getDirections}
+  >
+    <NearMe sx={{ fontSize: 22 }} />
+  </Button>
+</Tooltip>
             </Stack>
           )}
         </Box>
@@ -232,10 +234,11 @@ const ViewBuilderPage = () => {
                     size="small"
                     variant="outlined"
                     sx={{
+                       bgcolor: "#FF7A5A",
                       textTransform: "none",
                       borderColor: "#FF7A5A",
-                      color: "#FF7A5A",
-                      "&:hover": { bgcolor: "#FF7A5A", color: "#fff" },
+                     color: "#fff" ,
+                      "&:hover": { bgcolor: "#db6c51fe" },
                       mb: 1,
                     }}
                     onClick={() => handleOpenPastWork(work)}
