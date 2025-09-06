@@ -16,6 +16,11 @@ import Sidebar from "../../../components/Sidebar";
 import axios from "axios";
 import { motion } from "framer-motion";
 import PastWorkViewModal from "../../../modal/PastWorkViewModal";
+import AiDesignAssistantModal from "../../../modal/AiDesignAssistantModal"
+import { Fab } from "@mui/material";
+
+import SendIcon from "@mui/icons-material/Send";
+
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -150,8 +155,14 @@ const DashboardO = () => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedWork, setSelectedWork] = useState(null);
+  const [selectedPortfolio, setSelectedPortfolio] = useState(null);
   const [pastWorkOpen, setPastWorkOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const [assistantOpen, setAssistantOpen] = useState(false);
+
+const handleAssistantOpen = () => setAssistantOpen(true);
+const handleAssistantClose = () => setAssistantOpen(false);
 
 
   const handleOpenPastWork = (work, portfolio) => {
@@ -425,6 +436,7 @@ const DashboardO = () => {
             ))}
           </Row>
         )}
+        
 
         {selectedWork && (
           <PastWorkViewModal
@@ -435,6 +447,35 @@ const DashboardO = () => {
           />
         )}
       </div>
+
+<motion.div
+  initial={{ y: 50, opacity: 0 }}
+  animate={{ y: 0, opacity: 1 }}
+  transition={{ type: "spring", stiffness: 120, damping: 12 }}
+  whileHover={{ scale: 1.1 }}
+  whileTap={{ scale: 0.95 }}
+  style={{ position: "fixed", bottom: 24, right: 24, zIndex: 1000 }}
+>
+  <Fab
+    onClick={handleAssistantOpen}
+    sx={{
+      bgcolor: "#333", 
+      color: "#fff",
+      width: 56,
+      height: 56,
+      boxShadow: "0 6px 20px rgba(0,0,0,0.4)",
+      "&:hover": {
+        bgcolor: "#444",
+      },
+    }}
+  >
+    <SendIcon />
+  </Fab>
+</motion.div>
+
+
+
+ <AiDesignAssistantModal open={assistantOpen} handleClose={handleAssistantClose} />
     </div>
   );
 };
