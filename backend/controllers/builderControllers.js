@@ -1,6 +1,9 @@
 import Portfolio from "../models/builderModel.js";
 import cloudinary from "../config/cloudinaryConfig.js";
 import streamifier from "streamifier";
+import axios from "axios";
+const LOCATIONIQ_KEY = process.env.LOCATIONIQ_KEY; 
+
 
 // helper for Cloudinary upload (returns url + public_id)
 const uploadToCloudinary = (fileBuffer, folder = "portfolio") => {
@@ -16,7 +19,26 @@ const uploadToCloudinary = (fileBuffer, folder = "portfolio") => {
   });
 };
 
-//  Portfolio
+// helper: geocode address using LocationIQ
+const geocodeAddress = async (address) => {
+  try {
+    const url = `https://us1.locationiq.com/v1/search?key=${LOCATIONIQ_KEY}&q=${encodeURIComponent(
+      address
+    )}&format=json&limit=1`;
+    const { data } = await axios.get(url);
+
+    if (data && data.length > 0) {
+      const { lat, lon } = data[0];
+      return { lat: parseFloat(lat), lon: parseFloat(lon) };
+    }
+    return null;
+  } catch (err) {
+    console.error("Geocoding failed:", err.message);
+    return null;
+  }
+};
+
+//PORTFOLIO//
 export const addPortfolio = async (req, res) => {
   try {
     const { company, experience, address, description } = req.body;
@@ -25,6 +47,8 @@ export const addPortfolio = async (req, res) => {
     if (!company || !experience || !address || !description) {
       return res.status(400).json({ error: "All fields are required." });
     }
+
+    const coords = await geocodeAddress(address);
 
     let logoObj;
     if (req.file) {
@@ -37,7 +61,10 @@ export const addPortfolio = async (req, res) => {
       address,
       description,
       logo: logoObj,
-      createdBy: builderId
+      createdBy: builderId,
+      location: coords
+        ? { type: "Point", coordinates: [coords.lon, coords.lat] }
+        : undefined,
     });
 
     await newPortfolio.save();
@@ -47,6 +74,7 @@ export const addPortfolio = async (req, res) => {
     res.status(500).json({ error: "Server error while adding portfolio" });
   }
 };
+
 
 // Get Portfolio
 export const getPortfolio = async (req, res) => {
@@ -66,6 +94,7 @@ export const getPortfolio = async (req, res) => {
 };
 
 // Update Portfolio
+
 export const updatePortfolio = async (req, res) => {
   try {
     const { company, experience, address, description } = req.body;
@@ -76,10 +105,22 @@ export const updatePortfolio = async (req, res) => {
       return res.status(404).json({ error: "Portfolio not found" });
     }
 
+    // update fields
     portfolio.company = company || portfolio.company;
     portfolio.experience = experience || portfolio.experience;
     portfolio.address = address || portfolio.address;
     portfolio.description = description || portfolio.description;
+
+    // if address changed, geocode again
+    if (address) {
+      const coords = await geocodeAddress(address);
+      if (coords) {
+        portfolio.location = {
+          type: "Point",
+          coordinates: [coords.lon, coords.lat],
+        };
+      }
+    }
 
     if (req.file) {
       // delete old logo if exists
@@ -160,7 +201,7 @@ export const addPastWork = async (req, res) => {
       title,
       description,
       price,
-      specialties: specialties ? specialties.split(",").map(s => s.trim()) : [],
+      specialties,
       images,
     };
 
@@ -221,5 +262,28 @@ export const getAllPortfolios = async (req, res) => {
   } catch (error) {
     console.error("Failed to fetch portfolios:", error);
     res.status(500).json({ error: "Server error while fetching portfolios" });
+  }
+};
+// Get single portfolio by ID
+export const getPortfolioById = async (req, res) => {
+  try {
+    // Only owners can access
+    if (req.user.role !== "owner") {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
+    const { id } = req.params;
+
+    // Find portfolio by ID and populate createdBy fields
+    const portfolio = await Portfolio.findById(id).populate("createdBy", "username email");
+
+    if (!portfolio) {
+      return res.status(404).json({ error: "Portfolio not found" });
+    }
+
+    res.status(200).json({ success: true, portfolio });
+  } catch (error) {
+    console.error("Failed to fetch portfolio:", error);
+    res.status(500).json({ error: "Server error while fetching portfolio" });
   }
 };

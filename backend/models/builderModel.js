@@ -6,9 +6,9 @@ const { Schema, model } = mongoose;
 const pastWorkSchema = new Schema({
   title: { type: String, required: true },
   description: { type: String },
-  images: [{ type: String }], // array of image URLs
-  price: { type: Number },
-  specialties: [{ type: String }], // e.g., "Residential", "Commercial"
+  images: [{ type: String }],
+  price: { type: String },
+  specialties: [{ type: String }],
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -22,7 +22,7 @@ const portfolioSchema = new Schema(
 ,
     createdBy: {
       type: Schema.Types.ObjectId,
-      ref: "User", // links to the User model
+      ref: "User", 
       required: true,
     },
     company: {
@@ -30,12 +30,16 @@ const portfolioSchema = new Schema(
       required: true,
     },
     experience: {
-      type: Number,
+       type: String,
       required: true,
     },
     address: {
       type: String,
       default: "",
+    },
+     location: {
+      type: { type: String, enum: ["Point"], default: "Point" },
+      coordinates: { type: [Number], default: [0, 0] },
     },
     description: {
       type: String,
@@ -49,6 +53,7 @@ const portfolioSchema = new Schema(
   { timestamps: true }
 );
 
+portfolioSchema.index({ location: "2dsphere" });
 const Portfolio = model("Portfolio", portfolioSchema);
 
 export default Portfolio;
