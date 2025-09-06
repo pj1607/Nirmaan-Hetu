@@ -101,7 +101,7 @@ const AiDesignAssistantModal = ({ open, handleClose, userId }) => {
       ]);
     } finally {
       setLoading(false);
-      inputRef.current?.focus(); // keep focus after sending
+      inputRef.current?.focus(); 
     }
   };
 
