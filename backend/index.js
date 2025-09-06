@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import connectDB from './config/conn.js';
 import User from './routes/userRoutes.js';
 import Builder from "./routes/builderRoutes.js"
+import Assistant from "./routes/assistantRoutes.js"
 
 import cors from 'cors';
 
@@ -31,6 +32,7 @@ app.use(cors({
 
 app.use('/auth', User);
 app.use('/builder', Builder);
+app.use('/assistant', Assistant);
 
 
 app.get('/', (req, res) => {
