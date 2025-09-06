@@ -2,7 +2,7 @@
 import React, { useCallback, useState, useEffect } from "react";
 import {
   Modal, Box, Typography, Button, Stack, IconButton, Divider,
-  Backdrop, TextField, CircularProgress, Avatar
+  Backdrop, TextField, CircularProgress, Avatar,MenuItem 
 } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 import { Close, Delete, Upload } from "@mui/icons-material";
@@ -14,8 +14,17 @@ import { toast } from "react-hot-toast";
 const API = import.meta.env.VITE_API_URL;
 const MotionBox = motion(Box);
 
-// Centralized Field component with consistent styling
-const Field = React.memo(function Field({ label, name, type = "text", multiline = false, rows, value, onChange }) {
+const Field = React.memo(function Field({
+  label,
+  name,
+  type = "text",
+  multiline = false,
+  rows,
+  value,
+  onChange,
+  children,
+  ...props
+}) {
   return (
     <TextField
       label={label}
@@ -33,7 +42,6 @@ const Field = React.memo(function Field({ label, name, type = "text", multiline 
       sx={{
         bgcolor: "#2c2c2c",
         borderRadius: 1.5,
-        
         "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#FF7A5A" },
         "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#FF7A5A" },
         "& input": { color: "white" },
@@ -44,11 +52,15 @@ const Field = React.memo(function Field({ label, name, type = "text", multiline 
         },
         "& .MuiOutlinedInput-root": {
           "&.Mui-focused fieldset": { borderColor: "#FF7A5A" },
-        }
+        },
       }}
-    />
+      {...props}  
+    >
+      {children}
+    </TextField>
   );
 });
+
 
 const PortfolioModal = ({ open, onClose }) => {
   const [formData, setFormData] = useState({
@@ -239,7 +251,32 @@ const PortfolioModal = ({ open, onClose }) => {
 
               {/* All fields with same styling */}
               <Field label="Company Name" name="company" value={formData.company} onChange={handleChange} />
-              <Field label="Years of Experience" name="experience" type="number" value={formData.experience} onChange={handleChange} />
+            {/* Years of Experience Selector */}
+<Field
+  label="Years of Experience"
+  name="experience"
+  value={formData.experience}
+  onChange={handleChange}
+  select
+  SelectProps={{
+    MenuProps: {
+      PaperProps: {
+        sx: {
+          bgcolor: "#303030ff",
+          color: "#fff",
+        },
+      },
+    },
+  }}
+>
+  <MenuItem value="0-1">0 - 1 year</MenuItem>
+  <MenuItem value="2-5">2 - 5 years</MenuItem>
+  <MenuItem value="6-10">6 - 10 years</MenuItem>
+  <MenuItem value="11-15">11 - 15 years</MenuItem>
+  <MenuItem value="15+">15+ years</MenuItem>
+</Field>
+
+
               <Field label="Company Address" name="address" multiline rows={2} value={formData.address} onChange={handleChange} />
               <Field label="Description / Skills" name="description" multiline rows={3} value={formData.description} onChange={handleChange} />
 

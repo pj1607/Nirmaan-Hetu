@@ -76,8 +76,8 @@ const Register = () => {
       toast.success(`Welcome, ${username}!`);
 
       setTimeout(() => {
-        if (role === 'owner') navigate('/dashboard/owner', { replace: true });
-        else if (role === 'builder') navigate('/dashboard/builder', { replace: true });
+        if (role === 'owner') navigate('/owner-dashboard', { replace: true });
+        else if (role === 'builder') navigate('/builder-dashboard', { replace: true });
         else navigate('/', { replace: true });
       }, 500);
 

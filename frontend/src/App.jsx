@@ -14,6 +14,7 @@ import { Toaster } from "react-hot-toast";
 import OwnerDashboard from './pages/dashboard/owner/DashboardO.jsx';
 import BuilderDashboard from './pages/dashboard/builder/DashboardB.jsx';
 import OAuthSuccess from './pages/OAuthSuccess.jsx';
+import ViewBuilderPage from './pages/ViewBuilderPage.jsx';
 
 const App = () => {
   const { isLoggedIn, role, loading } = useAuth();
@@ -28,8 +29,8 @@ const App = () => {
 
   const PublicRoute = ({ children }) => {
     if (isLoggedIn) {
-      if (role === 'owner') return <Navigate to="/dashboard/owner" replace />;
-      if (role === 'builder') return <Navigate to="/dashboard/builder" replace />;
+      if (role === 'owner') return <Navigate to="/owner-dashboard" replace />;
+      if (role === 'builder') return <Navigate to="/builder-dashboard" replace />;
     }
     return children;
   };
@@ -56,7 +57,7 @@ const App = () => {
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
 
         <Route
-          path="/dashboard/owner"
+          path="/owner-dashboard"
           element={
             <RequireAuth requiredRole="owner">
               <OwnerDashboard />
@@ -64,7 +65,15 @@ const App = () => {
           }
         />
         <Route
-          path="/dashboard/builder"
+          path="/owner-dashboard/view/:id"
+          element={
+            <RequireAuth requiredRole="owner">
+              <ViewBuilderPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/builder-dashboard"
           element={
             <RequireAuth requiredRole="builder">
               <BuilderDashboard />

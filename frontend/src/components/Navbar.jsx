@@ -40,11 +40,11 @@ const Navbar = () => {
   } else {
     if (role === 'owner') {
       menuItems = [
-        { label: 'Dashboard', path: '/dashboard/owner', icon: <DashboardIcon /> },
+        { label: 'Dashboard', path: '/owner-dashboard', icon: <DashboardIcon /> },
       ];
     } else if (role === 'builder') {
       menuItems = [
-        { label: 'Dashboard', path: '/dashboard/builder', icon: <DashboardIcon /> },
+        { label: 'Dashboard', path: '/builder-dashboard', icon: <DashboardIcon /> },
       ];
     }
     menuItems.push({ label: 'Logout', action: handleLogout, icon: <LoginIcon /> });

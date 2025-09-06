@@ -12,9 +12,6 @@ const ConfirmModal = ({ open, onClose, onConfirm, message = "Are you sure?" }) =
         <Modal
           open={open}
           onClose={onClose}
-          closeAfterTransition
-          BackdropComponent={Backdrop}
-          BackdropProps={{ sx: { backgroundColor: "rgba(0,0,0,0.45)" } }}
           sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
         >
           <MotionBox

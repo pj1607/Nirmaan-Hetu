@@ -11,6 +11,7 @@ import {
   Divider,
   Backdrop,
   CircularProgress,
+  MenuItem
 } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 import { Close, Delete } from "@mui/icons-material";
@@ -20,41 +21,38 @@ import { toast } from "react-hot-toast";
 const API = import.meta.env.VITE_API_URL;
 const MotionBox = motion(Box);
 
-// Reusable Field component
-const Field = React.memo(function Field({ label, name, type = "text", multiline = false, rows, value, onChange }) {
+const Field = React.memo(function Field({ label, name, value, onChange, ...props }) {
   return (
     <TextField
-         label={label}
-         name={name}
-         type={type}
-         fullWidth
-         multiline={multiline}
-         rows={rows}
-         value={value}
-         onChange={onChange}
-         variant="outlined"
-         size="medium"
-         InputProps={{ style: { color: "#fff" } }}
-         InputLabelProps={{ style: { color: "#ccc" } }}
-         sx={{
-           bgcolor: "#2c2c2c",
-           borderRadius: 1.5,
-           
-           "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#FF7A5A" },
-           "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#FF7A5A" },
-           "& input": { color: "white" },
-           "& input:-webkit-autofill": {
-             WebkitBoxShadow: "0 0 0 1000px #2c2c2c inset",
-             WebkitTextFillColor: "white",
-             caretColor: "white",
-           },
-           "& .MuiOutlinedInput-root": {
-             "&.Mui-focused fieldset": { borderColor: "#FF7A5A" },
-           }
-         }}
-       />
+      label={label}
+      name={name}
+      value={value}
+      onChange={onChange}
+      fullWidth
+      variant="outlined"
+      size="medium"
+      InputProps={{ style: { color: "#fff" } }}
+      InputLabelProps={{ style: { color: "#ccc" } }}
+      sx={{
+        bgcolor: "#2c2c2c",
+        borderRadius: 1.5,
+        "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#FF7A5A" },
+        "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#FF7A5A" },
+        "& input": { color: "white" },
+        "& input:-webkit-autofill": {
+          WebkitBoxShadow: "0 0 0 1000px #2c2c2c inset",
+          WebkitTextFillColor: "white",
+          caretColor: "white",
+        },
+        "& .MuiOutlinedInput-root": {
+          "&.Mui-focused fieldset": { borderColor: "#FF7A5A" },
+        }
+      }}
+      {...props}  
+    />
   );
 });
+
 
 // Image preview grid
 const ImagePreviewGrid = React.memo(function ImagePreviewGrid({ urls, onRemove }) {
@@ -100,7 +98,7 @@ const ImagePreviewGrid = React.memo(function ImagePreviewGrid({ urls, onRemove }
 });
 
 const PastWorkModal = ({ open, onClose, onAdd }) => {
-  const [workData, setWorkData] = useState({ title: "", description: "", price: "", specialties: "", images: [] });
+  const [workData, setWorkData] = useState({ title: "", description: "", price: "",  specialties: [],  images: [] });
   const [loading, setLoading] = useState(false);
   const objectUrlsRef = useRef([]);
 
@@ -149,7 +147,7 @@ const PastWorkModal = ({ open, onClose, onAdd }) => {
       fd.append("title", workData.title);
       fd.append("description", workData.description);
       fd.append("price", workData.price || 0);
-      fd.append("specialties", workData.specialties.split(",").map((s) => s.trim()).join(","));
+   fd.append("specialties", workData.specialties.join(","));
       workData.images.forEach((file) => {
         if (file instanceof File) fd.append("images", file);
       });
@@ -161,7 +159,14 @@ const PastWorkModal = ({ open, onClose, onAdd }) => {
       if (res.data.success) {
         toast.success("Past work added successfully!");
         onAdd(res.data.pastWork);
-        setWorkData({ title: "", description: "", price: "", specialties: "", images: [] });
+       setWorkData({
+  title: "",
+  description: "",
+  price: "",
+  specialties: [],   
+  images: []
+});
+
         onClose?.();
       } else {
         toast.error(res.data.error || "Failed to add past work");
@@ -216,8 +221,48 @@ const PastWorkModal = ({ open, onClose, onAdd }) => {
             <Stack spacing={2}>
               <Field label="Title" name="title" value={workData.title} onChange={handleChange} />
               <Field label="Description" name="description" multiline rows={3} value={workData.description} onChange={handleChange} />
-              <Field label="Price" name="price" type="number" value={workData.price} onChange={handleChange} />
-              <Field label="Specialties (comma separated)" name="specialties" value={workData.specialties} onChange={handleChange} />
+             <Field
+  label="Price Range"
+  name="price"
+  value={workData.price}
+  onChange={handleChange}
+  select
+  SelectProps={{
+    MenuProps: {
+      PaperProps: {
+        sx: { bgcolor: "#2c2c2c", color: "#fff" },
+      },
+    },
+  }}
+>
+  <MenuItem value="0-50000">₹0 – ₹50,000</MenuItem>
+  <MenuItem value="50000-200000">₹50,000 – ₹2,00,000</MenuItem>
+  <MenuItem value="200000-500000">₹2,00,000 – ₹5,00,000</MenuItem>
+  <MenuItem value="500000+">₹5,00,000+</MenuItem>
+</Field>
+
+           <Field
+  label="Specialties"
+  name="specialties"
+  value={workData.specialties}
+  onChange={(e) => setWorkData((prev) => ({ ...prev, specialties: e.target.value }))}
+  select
+  SelectProps={{
+    multiple: true,
+    renderValue: (selected) => selected.join(", "),
+    MenuProps: {
+      PaperProps: {
+        sx: { bgcolor: "#2c2c2c", color: "#fff" },
+      },
+    },
+  }}
+>
+  {["Residential", "Commercial", "Renovation", "Interior Design", "Landscaping"].map((spec) => (
+    <MenuItem key={spec} value={spec}>
+      {spec}
+    </MenuItem>
+  ))}
+</Field>
 
               <Button variant="outlined" component="label" sx={{ color: "#fff", borderColor: "#FF7A5A" }}>
                 Upload Images

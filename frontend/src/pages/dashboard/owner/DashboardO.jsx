@@ -10,11 +10,11 @@ import {
   Skeleton,
   Input,
 } from "antd";
+import { useNavigate } from "react-router-dom";
 import { MailOutlined, SearchOutlined } from "@ant-design/icons";
 import Sidebar from "../../../components/Sidebar";
 import axios from "axios";
 import { motion } from "framer-motion";
-import ViewBuilderModal from "../../../modal/ViewBuilderModal";
 import PastWorkViewModal from "../../../modal/PastWorkViewModal";
 
 const API = import.meta.env.VITE_API_URL;
@@ -144,20 +144,15 @@ const HeaderBanner = () => {
 };
 
 const DashboardO = () => {
+    const navigate = useNavigate();
   const [portfolios, setPortfolios] = useState([]);
   const [filteredPortfolios, setFilteredPortfolios] = useState([]);
-  const [selectedPortfolio, setSelectedPortfolio] = useState(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedWork, setSelectedWork] = useState(null);
   const [pastWorkOpen, setPastWorkOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const handleOpenPortfolio = (portfolio) => {
-    setSelectedPortfolio(portfolio);
-    setOpen(true);
-  };
-  const handleClosePortfolio = () => setOpen(false);
 
   const handleOpenPastWork = (work, portfolio) => {
     setSelectedPortfolio(portfolio);
@@ -419,7 +414,7 @@ const DashboardO = () => {
                           e.currentTarget.style.backgroundColor = "#FF7A5A";
                           e.currentTarget.style.borderColor = "#FF7A5A";
                         }}
-                        onClick={() => handleOpenPortfolio(portfolio)}
+                          onClick={() => navigate(`/owner-dashboard/view/${portfolio._id}`)} 
                       >
                         View More
                       </Button>
@@ -429,15 +424,6 @@ const DashboardO = () => {
               </Col>
             ))}
           </Row>
-        )}
-
-        {selectedPortfolio && (
-          <ViewBuilderModal
-            open={open}
-            handleClose={handleClosePortfolio}
-            portfolio={selectedPortfolio}
-            onPastWorkClick={handleOpenPastWork}
-          />
         )}
 
         {selectedWork && (
