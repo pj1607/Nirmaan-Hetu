@@ -12,10 +12,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import SendIcon from "@mui/icons-material/Send";
 import MicIcon from "@mui/icons-material/Mic";
 import PersonIcon from "@mui/icons-material/Person";
-import { motion } from "framer-motion";
+import { useAnimation,motion } from "framer-motion";
 import axios from "axios";
 import { franc } from "franc";
-
+import clickSoundFile from '../../src/assets/sound/mic.mp3'
 const API = import.meta.env.VITE_API_URL;
 
 // Slide-in transition from right
@@ -69,6 +69,35 @@ const AiDesignAssistantModal = ({ open, handleClose, userId }) => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
+  const micClickAudio = new Audio(clickSoundFile);
+  const recognitionRef = useRef(null);
+
+
+  
+const micControls = useAnimation();
+
+useEffect(() => {
+  if (listening) {
+    micControls.start({
+      scale: [1, 1.3, 1],
+      rotate: [0, 10, -10, 0],
+      boxShadow: [
+        "0 0 10px 2px rgba(255,0,0,0.6)", 
+        "0 0 20px 6px rgba(255,0,0,0.8)", 
+        "0 0 10px 2px rgba(255,0,0,0.6)"
+      ],
+      transition: { repeat: Infinity, duration: 0.6, ease: "easeInOut" },
+    });
+  } else {
+    micControls.start({
+      scale: 1,
+      rotate: 0,
+      boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+      transition: { duration: 0.2 },
+    });
+  }
+}, [listening]);
+
 
   // refs
   const messagesEndRef = useRef(null);
@@ -160,15 +189,25 @@ const speak = async (text) => {
     if (e.key === "Enter") sendMessage();
   };
 
+
   // Speech-to-Text (Mic Input)
-const startListening = () => {
+const toggleListening = () => {
   if (!("webkitSpeechRecognition" in window)) {
-    alert("Sorry, your browser doesn't support speech recognition.");
+    alert("Your browser doesn't support speech recognition.");
     return;
   }
 
+  // If already listening, stop immediately
+  if (listening && recognitionRef.current) {
+    recognitionRef.current.stop();
+    setListening(false);
+    return;
+  }
+
+  // Start new recognition
   const recognition = new window.webkitSpeechRecognition();
-  recognition.lang = "en-IN";
+  recognitionRef.current = recognition;
+  recognition.lang = "en-IN"; // default English
   recognition.continuous = false;
   recognition.interimResults = false;
 
@@ -176,20 +215,19 @@ const startListening = () => {
   recognition.onend = () => setListening(false);
 
   recognition.onresult = (event) => {
-    let spokenText = event.results[0][0].transcript;
+    const spokenText = event.results[0][0].transcript;
 
-    // Detect Hindi (Devanagari script characters)
+    // Detect Hindi (Roman/Devanagari)
     const isHindi = /[\u0900-\u097F]/.test(spokenText);
-
-    // Switch language dynamically for next recognition
     recognition.lang = isHindi ? "hi-IN" : "en-IN";
 
     setInput(spokenText);
-    sendMessage(spokenText, recognition.lang); // Pass language along
+    sendMessage(spokenText);
   };
 
   recognition.start();
 };
+
 
   return (
     <Dialog
@@ -336,16 +374,32 @@ const startListening = () => {
         />
 
         {/* Mic Button */}
-        <IconButton
-          onClick={startListening}
-          sx={{
-            bgcolor: listening ? "red" : "#444",
-            color: "#fff",
-            "&:hover": { bgcolor: listening ? "darkred" : "#555" },
-          }}
-        >
-          <MicIcon />
-        </IconButton>
+    <IconButton
+  onClick={toggleListening}
+  component={motion.button}
+  animate={micControls}
+  whileTap={{ scale: 1.2, rotate: 15 }}
+  sx={{
+    bgcolor: listening ? "red" : "#444",
+    color: "#fff",
+    width: 60,
+    height: 60,
+    borderRadius: "50%",
+    "&:hover": { 
+      bgcolor: listening ? "darkred" : "#555",
+      transform: "scale(1.1)",
+      transition: "0.2s ease-in-out",
+    },
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    border: listening ? "2px solid #ff4d4d" : "2px solid transparent",
+  }}
+>
+  <MicIcon sx={{ fontSize: 28, color: listening ? "#fff" : "#ddd" }} />
+</IconButton>
+
 
         {/* Send Button */}
         <IconButton
