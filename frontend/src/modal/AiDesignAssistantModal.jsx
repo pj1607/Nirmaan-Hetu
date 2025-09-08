@@ -71,6 +71,8 @@ const AiDesignAssistantModal = ({ open, handleClose, userId }) => {
   const [listening, setListening] = useState(false);
   const micClickAudio = new Audio(clickSoundFile);
   const recognitionRef = useRef(null);
+  const [fromMic, setFromMic] = useState(false);
+
 
 
   
@@ -172,7 +174,11 @@ const speak = async (text) => {
       const botMessage = { sender: "assistant", text: res.data.reply };
       setMessages((prev) => [...prev, botMessage]);
 
-      speak(res.data.reply);
+     
+  if (fromMic) {
+    speak(res.data.reply);
+    setFromMic(false);
+  }
     } catch (err) {
       console.error(err);
       setMessages((prev) => [
@@ -222,6 +228,7 @@ const toggleListening = () => {
     recognition.lang = isHindi ? "hi-IN" : "en-IN";
 
     setInput(spokenText);
+    setFromMic(true);   
     sendMessage(spokenText);
   };
 
