@@ -30,7 +30,7 @@ const FullPageLoader = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        bgcolor: "rgb(49, 49, 49)",
+        bgcolor: "rgba(30, 30, 30, 1)",
         zIndex: 2000,
         overflow: "hidden",
       }}
