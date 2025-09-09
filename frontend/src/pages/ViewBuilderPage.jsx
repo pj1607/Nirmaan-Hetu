@@ -6,6 +6,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import PastWorkViewModal from "../modal/PastWorkViewModal";
 import BuilderMap from "../components/BuilderMap";
+import FullPageLoader from "../components/FullPageLoader"
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -55,6 +56,8 @@ const ViewBuilderPage = () => {
   }, [id]);
 
   return (
+     <>
+      {loading && <FullPageLoader />} 
     <Box
       sx={{
         position: "relative",
@@ -284,6 +287,7 @@ const ViewBuilderPage = () => {
         <PastWorkViewModal open={pastWorkModalOpen} handleClose={handleClosePastWork} work={selectedWork} portfolio={portfolio} />
       )}
     </Box>
+     </>
   );
 };
 
