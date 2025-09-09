@@ -56,7 +56,6 @@ const Field = React.memo(function Field({
       }}
       {...props}  
     >
-      {children}
     </TextField>
   );
 });
@@ -297,7 +296,7 @@ const PortfolioModal = ({ open, onClose }) => {
               <Button type="submit" variant="contained" disabled={loading}
                 sx={{ bgcolor: "#FF7A5A", "&:hover": { bgcolor: "#e7643f" }, display: "flex", alignItems: "center", gap: 1 }}
               >
-                {loading && <CircularProgress size={20} sx={{ color: "#fff" }} />}
+                {loading && <CircularProgress size={26} sx={{ color: "#fff" }} />}
                 {portfolioExists ? "Update Portfolio" : "Save Portfolio"}
               </Button>
             </Stack>
