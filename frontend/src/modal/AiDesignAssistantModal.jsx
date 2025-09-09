@@ -138,11 +138,7 @@ const AiDesignAssistantModal = ({ open, handleClose, userId }) => {
       ? ["Google हिन्दी", "com.apple.ttsbundle.sangeeta-compact"]
       : [
           "Google US English",
-          "Samantha",
-          "Karen",
-          "Moira",
-          "Daniel",
-          "Fred",
+        "Siri Female (en-US)", "Siri Male (en-US)"
         ];
 
     let voice = voices.find((v) => preferredVoices.includes(v.name));
@@ -181,10 +177,10 @@ const AiDesignAssistantModal = ({ open, handleClose, userId }) => {
       const botMessage = { sender: "assistant", text: res.data.reply };
       setMessages((prev) => [...prev, botMessage]);
 
-      setLastLang(res.data.lang); // <- save lang from backend
+      setLastLang(res.data.lang);
 
       if (fromMic) {
-        speak(res.data.reply, res.data.lang); // <- use backend lang
+        speak(res.data.reply, res.data.lang); 
         setFromMic(false);
       }
     } catch (err) {
@@ -210,7 +206,6 @@ const AiDesignAssistantModal = ({ open, handleClose, userId }) => {
       return;
     }
 
-    // Unlock speech on iOS (only needs to run once after tap)
     initSpeech();
 
     if (listening && recognitionRef.current) {
