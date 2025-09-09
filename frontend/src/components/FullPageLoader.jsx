@@ -73,7 +73,7 @@ const FullPageLoader = () => {
                 height: "3vw",
                 minHeight: "18px",
                 maxHeight: "25px",
-                backgroundColor: "#ffcc66",
+                backgroundColor: "#ff5555ff",
                 borderRadius: "3px",
               }}
             />
