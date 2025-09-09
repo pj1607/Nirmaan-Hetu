@@ -7,8 +7,7 @@ const MotionBox = motion(Box);
 
 const PastWorkViewModal = ({ open, handleClose, work, portfolio }) => {
   const [selectedImage, setSelectedImage] = useState(null);
-
-  // Reset selected image when modal opens
+  
   useEffect(() => {
     if (open) setSelectedImage(null);
   }, [open, work]);

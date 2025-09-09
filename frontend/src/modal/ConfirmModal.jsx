@@ -1,11 +1,11 @@
 // ConfirmModal.jsx
 import React from "react";
-import { Modal, Box, Typography, Button, Stack, Backdrop } from "@mui/material";
+import { Modal, Box, Typography, Button, Stack, CircularProgress } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 
 const MotionBox = motion(Box);
 
-const ConfirmModal = ({ open, onClose, onConfirm, message = "Are you sure?" }) => {
+const ConfirmModal = ({ open, onClose, onConfirm, message = "Are you sure?", loading = false }) => {
   return (
     <AnimatePresence>
       {open && (
@@ -40,6 +40,7 @@ const ConfirmModal = ({ open, onClose, onConfirm, message = "Are you sure?" }) =
               <Button
                 variant="outlined"
                 onClick={onClose}
+                disabled={loading}
                 sx={{
                   px: 3,
                   borderRadius: 2,
@@ -54,15 +55,24 @@ const ConfirmModal = ({ open, onClose, onConfirm, message = "Are you sure?" }) =
               <Button
                 variant="contained"
                 onClick={onConfirm}
+                disabled={loading}
                 sx={{
                   px: 3,
                   borderRadius: 2,
                   textTransform: "none",
                   bgcolor: "#FF7A5A",
+                  minWidth: 100, // keeps button size stable
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                   "&:hover": { bgcolor: "#e7643f" },
                 }}
               >
-                Confirm
+                {loading ? (
+                  <CircularProgress size={22} sx={{ color: "white" }} />
+                ) : (
+                  "Confirm"
+                )}
               </Button>
             </Stack>
           </MotionBox>

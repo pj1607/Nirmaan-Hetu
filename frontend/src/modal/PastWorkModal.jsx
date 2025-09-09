@@ -276,7 +276,7 @@ const PastWorkModal = ({ open, onClose, onAdd }) => {
                 sx={{ bgcolor: "#FF7A5A", "&:hover": { bgcolor: "#e7643f" } }}
                 disabled={loading}
               >
-                {loading ? <CircularProgress size={20} color="inherit" /> : "Add Past Work"}
+                {loading ? <CircularProgress size={20} sx={{ color: "#fff" }} /> : "Add Past Work"}
               </Button>
             </Stack>
           </MotionBox>

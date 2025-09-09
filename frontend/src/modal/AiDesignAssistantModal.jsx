@@ -12,10 +12,9 @@ import CloseIcon from "@mui/icons-material/Close";
 import SendIcon from "@mui/icons-material/Send";
 import MicIcon from "@mui/icons-material/Mic";
 import PersonIcon from "@mui/icons-material/Person";
-import { useAnimation,motion } from "framer-motion";
+import { useAnimation, motion } from "framer-motion";
 import axios from "axios";
-import { franc } from "franc";
-import clickSoundFile from '../../src/assets/sound/mic.mp3'
+
 const API = import.meta.env.VITE_API_URL;
 
 // Slide-in transition from right
@@ -69,37 +68,33 @@ const AiDesignAssistantModal = ({ open, handleClose, userId }) => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
-  const micClickAudio = new Audio(clickSoundFile);
   const recognitionRef = useRef(null);
   const [fromMic, setFromMic] = useState(false);
+  const [lastLang, setLastLang] = useState("en"); // <- store lang from backend
 
+  const micControls = useAnimation();
 
-
-  
-const micControls = useAnimation();
-
-useEffect(() => {
-  if (listening) {
-    micControls.start({
-      scale: [1, 1.3, 1],
-      rotate: [0, 10, -10, 0],
-      boxShadow: [
-        "0 0 10px 2px rgba(255,0,0,0.6)", 
-        "0 0 20px 6px rgba(255,0,0,0.8)", 
-        "0 0 10px 2px rgba(255,0,0,0.6)"
-      ],
-      transition: { repeat: Infinity, duration: 0.6, ease: "easeInOut" },
-    });
-  } else {
-    micControls.start({
-      scale: 1,
-      rotate: 0,
-      boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
-      transition: { duration: 0.2 },
-    });
-  }
-}, [listening]);
-
+  useEffect(() => {
+    if (listening) {
+      micControls.start({
+        scale: [1, 1.3, 1],
+        rotate: [0, 10, -10, 0],
+        boxShadow: [
+          "0 0 10px 2px rgba(255,0,0,0.6)",
+          "0 0 20px 6px rgba(255,0,0,0.8)",
+          "0 0 10px 2px rgba(255,0,0,0.6)",
+        ],
+        transition: { repeat: Infinity, duration: 0.6, ease: "easeInOut" },
+      });
+    } else {
+      micControls.start({
+        scale: 1,
+        rotate: 0,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+        transition: { duration: 0.2 },
+      });
+    }
+  }, [listening]);
 
   // refs
   const messagesEndRef = useRef(null);
@@ -113,49 +108,61 @@ useEffect(() => {
     scrollToBottom();
   }, [messages, loading]);
 
-const detectLanguage = async (text) => {
-  try {
-    const res = await axios.post(`${API}/assistant/detect-lang`, { text });
-    return res.data.lang; 
-  } catch (err) {
-    console.error("Language detection failed:", err);
-    return "en"; 
-  }
-};
+  // ---- Unlock Speech on iOS (must run once after first user tap) ----
+  const initSpeech = () => {
+    if (!window.speechSynthesis) return;
+    const dummy = new SpeechSynthesisUtterance("");
+    window.speechSynthesis.speak(dummy);
+  };
 
-const speak = async (text) => {
-  if (!window.speechSynthesis) return;
+  // ---- Get Voices with Retry (handles iOS empty voices bug) ----
+  const getVoices = () =>
+    new Promise((resolve) => {
+      let voices = window.speechSynthesis.getVoices();
+      if (voices.length) return resolve(voices);
 
-  const lang = await detectLanguage(text);
-  const isHindi = lang === "hi";
+      window.speechSynthesis.onvoiceschanged = () => {
+        voices = window.speechSynthesis.getVoices();
+        resolve(voices);
+      };
+    });
 
-  let voices = window.speechSynthesis.getVoices();
-  if (voices.length === 0) {
-    window.speechSynthesis.onvoiceschanged = () => speak(text);
-    return;
-  }
+  // ---- Speak Function (Desktop + iOS safe) ----
+  const speak = async (text, lang) => {
+    if (!window.speechSynthesis) return;
 
-  const preferredVoices = isHindi
-    ? ["Google हिन्दी", "Microsoft Kalpana Online (Natural) - Hindi (India)"]
-    : ["Google US English", "Google UK English Female"];
+    const isHindi = lang === "hi";
+    const voices = await getVoices();
 
-  let voice = voices.find((v) => preferredVoices.includes(v.name));
-  if (!voice) {
-    voice =
-      voices.find((v) => v.lang.includes(isHindi ? "hi" : "en")) || voices[0];
-  }
+    const preferredVoices = isHindi
+      ? ["Google हिन्दी", "com.apple.ttsbundle.sangeeta-compact"]
+      : [
+          "Google US English",
+          "Samantha",
+          "Karen",
+          "Moira",
+          "Daniel",
+          "Fred",
+        ];
 
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.voice = voice;
-  utterance.lang = isHindi ? "hi-IN" : "en-US";
-  utterance.rate = isHindi ? 1.0 : 1.05;
-  utterance.pitch = 1.0;
-  utterance.volume = 1;
+    let voice = voices.find((v) => preferredVoices.includes(v.name));
+    if (!voice) {
+      voice =
+        voices.find((v) =>
+          v.lang.toLowerCase().includes(isHindi ? "hi" : "en")
+        ) || voices[0];
+    }
 
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(utterance);
-};
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.voice = voice;
+    utterance.lang = isHindi ? "hi-IN" : "en-US";
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = 1;
 
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
+  };
 
   const sendMessage = async (overrideText) => {
     const textToSend = overrideText || input;
@@ -174,11 +181,12 @@ const speak = async (text) => {
       const botMessage = { sender: "assistant", text: res.data.reply };
       setMessages((prev) => [...prev, botMessage]);
 
-     
-  if (fromMic) {
-    speak(res.data.reply);
-    setFromMic(false);
-  }
+      setLastLang(res.data.lang); // <- save lang from backend
+
+      if (fromMic) {
+        speak(res.data.reply, res.data.lang); // <- use backend lang
+        setFromMic(false);
+      }
     } catch (err) {
       console.error(err);
       setMessages((prev) => [
@@ -195,46 +203,40 @@ const speak = async (text) => {
     if (e.key === "Enter") sendMessage();
   };
 
-
   // Speech-to-Text (Mic Input)
-const toggleListening = () => {
-  if (!("webkitSpeechRecognition" in window)) {
-    alert("Your browser doesn't support speech recognition.");
-    return;
-  }
+  const toggleListening = () => {
+    if (!("webkitSpeechRecognition" in window)) {
+      alert("Your browser doesn't support speech recognition.");
+      return;
+    }
 
-  // If already listening, stop immediately
-  if (listening && recognitionRef.current) {
-    recognitionRef.current.stop();
-    setListening(false);
-    return;
-  }
+    // Unlock speech on iOS (only needs to run once after tap)
+    initSpeech();
 
-  // Start new recognition
-  const recognition = new window.webkitSpeechRecognition();
-  recognitionRef.current = recognition;
-  recognition.lang = "en-IN"; // default English
-  recognition.continuous = false;
-  recognition.interimResults = false;
+    if (listening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setListening(false);
+      return;
+    }
 
-  recognition.onstart = () => setListening(true);
-  recognition.onend = () => setListening(false);
+    const recognition = new window.webkitSpeechRecognition();
+    recognitionRef.current = recognition;
+    recognition.lang = "en-IN";
+    recognition.continuous = false;
+    recognition.interimResults = false;
 
-  recognition.onresult = (event) => {
-    const spokenText = event.results[0][0].transcript;
+    recognition.onstart = () => setListening(true);
+    recognition.onend = () => setListening(false);
 
-    // Detect Hindi (Roman/Devanagari)
-    const isHindi = /[\u0900-\u097F]/.test(spokenText);
-    recognition.lang = isHindi ? "hi-IN" : "en-IN";
+    recognition.onresult = (event) => {
+      const spokenText = event.results[0][0].transcript;
+      setInput(spokenText);
+      setFromMic(true);
+      sendMessage(spokenText);
+    };
 
-    setInput(spokenText);
-    setFromMic(true);   
-    sendMessage(spokenText);
+    recognition.start();
   };
-
-  recognition.start();
-};
-
 
   return (
     <Dialog
@@ -381,32 +383,31 @@ const toggleListening = () => {
         />
 
         {/* Mic Button */}
-    <IconButton
-  onClick={toggleListening}
-  component={motion.button}
-  animate={micControls}
-  whileTap={{ scale: 1.2, rotate: 15 }}
-  sx={{
-    bgcolor: listening ? "red" : "#444",
-    color: "#fff",
-    width: 60,
-    height: 60,
-    borderRadius: "50%",
-    "&:hover": { 
-      bgcolor: listening ? "darkred" : "#555",
-      transform: "scale(1.1)",
-      transition: "0.2s ease-in-out",
-    },
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    border: listening ? "2px solid #ff4d4d" : "2px solid transparent",
-  }}
->
-  <MicIcon sx={{ fontSize: 28, color: listening ? "#fff" : "#ddd" }} />
-</IconButton>
-
+        <IconButton
+          onClick={toggleListening}
+          component={motion.button}
+          animate={micControls}
+          whileTap={{ scale: 1.2, rotate: 15 }}
+          sx={{
+            bgcolor: listening ? "red" : "#444",
+            color: "#fff",
+            width: 60,
+            height: 60,
+            borderRadius: "50%",
+            "&:hover": {
+              bgcolor: listening ? "darkred" : "#555",
+              transform: "scale(1.1)",
+              transition: "0.2s ease-in-out",
+            },
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            border: listening ? "2px solid #ff4d4d" : "2px solid transparent",
+          }}
+        >
+          <MicIcon sx={{ fontSize: 28, color: listening ? "#fff" : "#ddd" }} />
+        </IconButton>
 
         {/* Send Button */}
         <IconButton
