@@ -232,7 +232,7 @@ const ViewBuilderPage = () => {
                 <Skeleton key={i} variant="rectangular" width={100} height={30} sx={{ borderRadius: 1, mb: 1 }} />
               ))
             : portfolio.pastWorks?.map((work, idx) => (
-                <motion.div key={idx} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <motion.div key={idx} whileHover={{ scale: 1.03 }} >
                   <Button
                     size="small"
                     variant="outlined"
