@@ -2,6 +2,7 @@ import React from "react";
 import { Box } from "@mui/material";
 import { motion } from "framer-motion";
 
+
 // Brick animation (drop effect)
 const brickVariants = {
   hidden: { opacity: 0, y: -20, scale: 0.8 },
@@ -20,9 +21,10 @@ const brickVariants = {
 
 const FullPageLoader = () => {
   return (
+
     <Box
       sx={{
-        position: "fixed",
+       position: "absolute",
         top: 0,
         left: 0,
         width: "100vw",
@@ -31,7 +33,7 @@ const FullPageLoader = () => {
         justifyContent: "center",
         alignItems: "center",
         bgcolor: "rgba(30, 30, 30, 1)",
-        zIndex: 2000,
+        zIndex: 999,
         overflow: "hidden",
       }}
     >
