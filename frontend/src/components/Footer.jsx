@@ -1,6 +1,6 @@
 import React from "react";
 import { Box } from "@mui/material";
-import pjLogo from "../assets/logo.png";
+import pjLogo from "../assets/logo2.png";
 import { useAuth } from "../context/AuthContext";
 
 const Footer = () => {
@@ -10,7 +10,7 @@ const Footer = () => {
     <Box
       component="footer"
       sx={{
-        py: 2,
+        py: 5,
         textAlign: "center",
         fontSize: { xs: "7px", sm: "10px" },
         backgroundColor: isLoggedIn ? "transparent" : "#1f1f1f",

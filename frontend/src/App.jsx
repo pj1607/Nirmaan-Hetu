@@ -80,7 +80,9 @@ const App = () => {
             </RequireAuth>
           }
         />
+        
       </Routes>
+      <Footer/>
  </Box>
   );
 };
