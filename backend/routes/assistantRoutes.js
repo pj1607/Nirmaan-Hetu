@@ -80,36 +80,27 @@ router.post("/", async (req, res) => {
       chatDoc.history = chatDoc.history.slice(-30);
     }
 
-    // System instruction for AI to reply in the same script
-    const langInstruction = {
-      role: "user",
-      parts: [
-        {
-          text:
-            lang === "hi"
-              ? "Reply in Roman Hindi only, keep it warm and conversational."
-              : "Reply in English only, keep it warm and conversational.",
-        },
-      ],
-    };
 
     // Prepare history for Gemini
     const historyForGemini = [
       ...defaultInstructions,
-      langInstruction,
       ...chatDoc.history.slice(-15),
     ];
+// Start chat
+const chat = model.startChat({ history: historyForGemini });
+let reply = "";
+try {
+  const langWrappedMsg =
+    lang === "hi"
+      ? `Reply only in Roman Hindi. User said: "${message}"`
+      : `Reply only in English. User said: "${message}"`;
 
-    // Start chat
-    const chat = model.startChat({ history: historyForGemini });
-    let reply = "";
-    try {
-      const result = await chat.sendMessage(message);
-      reply = result.response.text();
-    } catch (aiErr) {
-      console.error("Gemini API error:", aiErr.message);
-      reply = "Sorry, I couldn’t process that right now.";
-    }
+  const result = await chat.sendMessage(langWrappedMsg);
+  reply = result.response.text();
+} catch (aiErr) {
+  console.error("Gemini API error:", aiErr.message);
+  reply = "Sorry, I couldn’t process that right now.";
+}
 
     // Save assistant reply
     chatDoc.history.push({ role: "model", parts: [{ text: reply }] });
@@ -139,22 +130,6 @@ router.post("/reset", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to reset chat session" });
-  }
-});
-router.post("/detect-lang", async (req, res) => {
-  try {
-    const { text } = req.body;
-    const detectPrompt = `
-    Detect if this text is Hindi (including Roman Hindi) or English. 
-    Reply with only "hi" for Hindi or "en" for English. 
-    Text: "${text}"
-    `;
-    const result = await model.generateContent(detectPrompt);
-    const lang = result.response.text().trim().toLowerCase();
-    res.json({ lang: lang === "hi" ? "hi" : "en" });
-  } catch (err) {
-    console.error("Lang detect error:", err);
-    res.json({ lang: "en" }); // fallback to English
   }
 });
 
