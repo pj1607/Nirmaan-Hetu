@@ -3,3 +3,13 @@ frontend/.env
 
 backend/node_modules/
 backend/.env
+
+# Python AI service
+ai-service/venv/
+ai-service/.venv/
+ai-service/.env
+ai-service/**/__pycache__/
+ai-service/**/*.py[cod]
+ai-service/data/chroma_db/
+ai-service/data/documents/*
+!ai-service/data/documents/.gitkeep
