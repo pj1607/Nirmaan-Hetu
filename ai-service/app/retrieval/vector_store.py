@@ -25,7 +25,7 @@ def add_chunks(chunks: list[dict]) -> int:
 
     collection = get_collection()
     ids = [
-        f"{item['metadata']['source']}:{item['metadata']['page']}:{item['metadata']['chunk']}"
+        f"{item['metadata']['document_id']}:{item['metadata']['page']}:{item['metadata']['chunk']}"
         for item in chunks
     ]
     embeddings = [
@@ -44,27 +44,38 @@ def add_chunks(chunks: list[dict]) -> int:
 
 def search_chunks(query: str, top_k: int = 4) -> list[dict]:
     collection = get_collection()
+    total_chunks = collection.count()
 
-    if collection.count() == 0:
+    if total_chunks == 0:
         return []
 
     query_embedding = embed_text(query, "RETRIEVAL_QUERY")
+    candidate_count = min(max(top_k * 3, top_k), total_chunks)
     results = collection.query(
         query_embeddings=[query_embedding],
-        n_results=min(top_k, collection.count()),
+        n_results=candidate_count,
+        include=["documents", "metadatas", "distances"],
     )
 
     documents = results.get("documents", [[]])[0]
     metadatas = results.get("metadatas", [[]])[0]
     distances = results.get("distances", [[]])[0]
 
-    return [
-        {
-            "text": document,
-            "metadata": metadata,
-            "distance": distance,
-        }
-        for document, metadata, distance in zip(
-            documents, metadatas, distances
+    relevant_chunks = []
+    for document, metadata, distance in zip(documents, metadatas, distances):
+        if document is None or metadata is None or distance is None:
+            continue
+        if distance > settings.MAX_RETRIEVAL_DISTANCE:
+            continue
+
+        relevant_chunks.append(
+            {
+                "text": document,
+                "metadata": metadata,
+                "distance": distance,
+            }
         )
-    ]
+        if len(relevant_chunks) == top_k:
+            break
+
+    return relevant_chunks
