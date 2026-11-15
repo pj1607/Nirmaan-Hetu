@@ -9,6 +9,7 @@ from app.retrieval.vector_store import search_chunks
 
 class AgentState(TypedDict, total=False):
     question: str
+    owner_id: str
     top_k: int
     route: Literal["retrieve", "general"]
     retrieved_chunks: list[dict]
@@ -42,7 +43,7 @@ Classification:"""
 
 def _retrieve_documents(state: AgentState) -> dict:
     """Retrieval tool: search the ChromaDB knowledge base for relevant chunks."""
-    chunks = search_chunks(state["question"], state.get("top_k", 4))
+    chunks = search_chunks(state["question"], state["owner_id"], state.get("top_k", 4))
     return {
         "retrieved_chunks": chunks,
         "agent_steps": state.get("agent_steps", []) + ["retrieve_documents"],
@@ -124,9 +125,9 @@ def build_agent_graph():
 agent_graph = build_agent_graph()
 
 
-def run_agent(question: str, top_k: int = 4) -> dict:
-    """Run the agent and return its answer, sources, and execution trace."""
-    result = agent_graph.invoke({"question": question, "top_k": top_k})
+def run_agent(question: str, owner_id: str, top_k: int = 4) -> dict:
+    """Run the agent using only the authenticated Owner documents."""
+    result = agent_graph.invoke({"question": question, "owner_id": owner_id, "top_k": top_k})
     return {
         "answer": result.get("answer", ""),
         "sources": result.get("sources", []),
