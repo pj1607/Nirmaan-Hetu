@@ -1,9 +1,10 @@
+import hmac
 import logging
 import tempfile
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Header, HTTPException, UploadFile
 from google.genai.errors import APIError
 from pydantic import BaseModel, Field, field_validator
 from pypdf.errors import PdfReadError
@@ -20,6 +21,24 @@ router = APIRouter(prefix="/api", tags=["RAG"])
 agent_router = APIRouter(prefix="/api/agent", tags=["Agentic AI"])
 
 
+def require_internal_owner(
+    internal_key: str | None = Header(default=None, alias="X-Internal-AI-Key"),
+    owner_id: str | None = Header(default=None, alias="X-Owner-ID"),
+) -> str:
+    """Accept requests only from the authenticated Node.js backend."""
+    expected_key = settings.INTERNAL_AI_API_KEY
+    if not expected_key:
+        raise HTTPException(
+            status_code=503,
+            detail="Internal AI authentication is not configured.",
+        )
+    if not internal_key or not hmac.compare_digest(internal_key, expected_key):
+        raise HTTPException(status_code=401, detail="Unauthorized AI service request.")
+    if not owner_id:
+        raise HTTPException(status_code=401, detail="Owner identity is required.")
+    return owner_id
+
+
 class QueryRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
     top_k: int = Field(default=4, ge=1, le=10)
@@ -34,7 +53,10 @@ class QueryRequest(BaseModel):
 
 
 @router.post("/documents/upload")
-async def upload_document(file: UploadFile = File(...)) -> dict:
+async def upload_document(
+    file: UploadFile = File(...),
+    owner_id: str = Depends(require_internal_owner),
+) -> dict:
     if not file.filename or not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported.")
 
@@ -76,7 +98,7 @@ async def upload_document(file: UploadFile = File(...)) -> dict:
             chunk["metadata"]["source"] = file.filename
             chunk["metadata"]["document_id"] = document_id
 
-        stored_chunks = add_chunks(chunks)
+        stored_chunks = add_chunks(chunks, owner_id)
         return {
             "message": "Document ingested successfully.",
             "document_id": document_id,
@@ -103,9 +125,12 @@ async def upload_document(file: UploadFile = File(...)) -> dict:
 
 
 @router.post("/query")
-def query_documents(request: QueryRequest) -> dict:
+def query_documents(
+    request: QueryRequest,
+    owner_id: str = Depends(require_internal_owner),
+) -> dict:
     try:
-        chunks = search_chunks(request.question, request.top_k)
+        chunks = search_chunks(request.question, owner_id, request.top_k)
         answer = generate_rag_answer(request.question, chunks)
 
         sources = [
@@ -141,10 +166,13 @@ def query_documents(request: QueryRequest) -> dict:
 
 
 @agent_router.post("/query")
-def query_with_agent(request: QueryRequest) -> dict:
+def query_with_agent(
+    request: QueryRequest,
+    owner_id: str = Depends(require_internal_owner),
+) -> dict:
     """Run the LangGraph agent, which chooses whether to call document retrieval."""
     try:
-        result = run_agent(request.question, request.top_k)
+        result = run_agent(request.question, owner_id, request.top_k)
         return {
             "question": request.question,
             **result,
