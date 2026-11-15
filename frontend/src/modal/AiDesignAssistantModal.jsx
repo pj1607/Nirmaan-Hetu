@@ -17,8 +17,11 @@ import PersonIcon from "@mui/icons-material/Person";
 import { useAnimation, motion } from "framer-motion";
 import axios from "axios";
 
-const AI_API =
-  import.meta.env.VITE_AI_SERVICE_URL || "http://127.0.0.1:8000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 // Slide-in transition from right
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -167,10 +170,10 @@ const AiDesignAssistantModal = ({ open, handleClose }) => {
     setLoading(true);
 
     try {
-      const res = await axios.post(`${AI_API}/api/agent/query`, {
+      const res = await axios.post(`${API_URL}/ai/agent/query`, {
         question: textToSend,
         top_k: 4,
-      });
+      }, { headers: getAuthHeaders() });
 
       const answer = res.data.answer || "I couldn't generate an answer.";
       const sources = Array.isArray(res.data.sources) ? res.data.sources : [];
@@ -237,8 +240,9 @@ const AiDesignAssistantModal = ({ open, handleClose }) => {
 
     try {
       const response = await axios.post(
-        `${AI_API}/api/documents/upload`,
-        formData
+        `${API_URL}/ai/documents/upload`,
+        formData,
+        { headers: getAuthHeaders() }
       );
       const filename = response.data.filename || selectedFile.name;
       const chunks = response.data.chunks_stored;

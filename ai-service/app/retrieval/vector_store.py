@@ -19,11 +19,14 @@ def get_collection():
     )
 
 
-def add_chunks(chunks: list[dict]) -> int:
+def add_chunks(chunks: list[dict], owner_id: str) -> int:
     if not chunks:
         return 0
 
     collection = get_collection()
+    for item in chunks:
+        item["metadata"]["owner_id"] = owner_id
+
     ids = [
         f"{item['metadata']['document_id']}:{item['metadata']['page']}:{item['metadata']['chunk']}"
         for item in chunks
@@ -42,9 +45,10 @@ def add_chunks(chunks: list[dict]) -> int:
     return len(chunks)
 
 
-def search_chunks(query: str, top_k: int = 4) -> list[dict]:
+def search_chunks(query: str, owner_id: str, top_k: int = 4) -> list[dict]:
     collection = get_collection()
-    total_chunks = collection.count()
+    owner_filter = {"owner_id": owner_id}
+    total_chunks = collection.count(where=owner_filter)
 
     if total_chunks == 0:
         return []
@@ -54,6 +58,7 @@ def search_chunks(query: str, top_k: int = 4) -> list[dict]:
     results = collection.query(
         query_embeddings=[query_embedding],
         n_results=candidate_count,
+        where=owner_filter,
         include=["documents", "metadatas", "distances"],
     )
 
