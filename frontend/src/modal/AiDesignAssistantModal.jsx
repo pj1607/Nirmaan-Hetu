@@ -7,9 +7,11 @@ import {
   Stack,
   Avatar,
   Slide,
+  Button,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SendIcon from "@mui/icons-material/Send";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
 import MicIcon from "@mui/icons-material/Mic";
 import PersonIcon from "@mui/icons-material/Person";
 import { useAnimation, motion } from "framer-motion";
@@ -68,8 +70,11 @@ const AiDesignAssistantModal = ({ open, handleClose }) => {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const micControls = useAnimation();
 
@@ -193,6 +198,66 @@ const AiDesignAssistantModal = ({ open, handleClose }) => {
     } finally {
       setLoading(false);
       inputRef.current?.focus();
+    }
+  };
+
+  const handlePdfSelection = (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    const isPdf =
+      file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      setMessages((prev) => [
+        ...prev,
+        { sender: "assistant", text: "Please select a PDF file." },
+      ]);
+      return;
+    }
+
+    const maxSizeBytes = 15 * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+      setMessages((prev) => [
+        ...prev,
+        { sender: "assistant", text: "This PDF exceeds the 15 MB upload limit." },
+      ]);
+      return;
+    }
+
+    setSelectedFile(file);
+  };
+
+  const uploadPdf = async () => {
+    if (!selectedFile || uploading) return;
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+    setUploading(true);
+
+    try {
+      const response = await axios.post(
+        `${AI_API}/api/documents/upload`,
+        formData
+      );
+      const filename = response.data.filename || selectedFile.name;
+      const chunks = response.data.chunks_stored;
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "assistant",
+          text: `PDF "${filename}" uploaded successfully${Number.isFinite(chunks) ? ` and ${chunks} text chunks were indexed` : ""}. You can now ask questions about this document.`,
+        },
+      ]);
+      setSelectedFile(null);
+    } catch (err) {
+      console.error("PDF upload failed:", err);
+      const message =
+        err.response?.data?.detail ||
+        "The PDF could not be uploaded. Please check the AI service and try again.";
+      setMessages((prev) => [...prev, { sender: "assistant", text: message }]);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -369,12 +434,60 @@ const AiDesignAssistantModal = ({ open, handleClose }) => {
         sx={{
           p: 2,
           display: "flex",
-          alignItems: "center",
+          flexDirection: "column",
           flexShrink: 0,
           position: "relative",
           gap: 1,
         }}
       >
+        {selectedFile && (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 1,
+              px: 1.5,
+              py: 1,
+              borderRadius: 2,
+              bgcolor: "#333",
+            }}
+          >
+            <Box sx={{ color: "#ddd", fontSize: 12, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {selectedFile.name}
+            </Box>
+            <Button
+              size="small"
+              variant="contained"
+              onClick={uploadPdf}
+              disabled={uploading}
+              sx={{ bgcolor: "#FF7A5A", color: "#fff", flexShrink: 0, "&:hover": { bgcolor: "#ff6b4d" } }}
+            >
+              {uploading ? "Uploading..." : "Upload PDF"}
+            </Button>
+          </Box>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/pdf,.pdf"
+          hidden
+          onChange={handlePdfSelection}
+        />
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <IconButton
+            onClick={() => fileInputRef.current?.click()}
+            disabled={loading || uploading}
+            aria-label="Attach PDF"
+            title="Upload a PDF"
+            sx={{
+              bgcolor: "#444",
+              color: "#fff",
+              "&:hover": { bgcolor: "#555" },
+            }}
+          >
+            <AttachFileIcon />
+          </IconButton>
         <TextField
           fullWidth
           size="small"
@@ -384,7 +497,7 @@ const AiDesignAssistantModal = ({ open, handleClose }) => {
           onChange={(event) => setInput(event.target.value)}
           onKeyPress={handleKeyPress}
           inputRef={inputRef}
-          disabled={loading}
+          disabled={loading || uploading}
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: "20px",
@@ -407,7 +520,7 @@ const AiDesignAssistantModal = ({ open, handleClose }) => {
         {/* Mic Button */}
         <IconButton
           onClick={toggleListening}
-          disabled={loading}
+          disabled={loading || uploading}
           component={motion.button}
           animate={micControls}
           whileTap={{ scale: 1.2, rotate: 15 }}
@@ -435,7 +548,7 @@ const AiDesignAssistantModal = ({ open, handleClose }) => {
         {/* Send Button */}
         <IconButton
           onClick={() => sendMessage()}
-          disabled={loading || !input.trim()}
+          disabled={loading || uploading || !input.trim()}
           component={motion.button}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
@@ -448,6 +561,7 @@ const AiDesignAssistantModal = ({ open, handleClose }) => {
         >
           <SendIcon />
         </IconButton>
+        </Box>
       </Box>
     </Dialog>
   );
