@@ -8,6 +8,7 @@ from google.genai.errors import APIError
 from pydantic import BaseModel, Field, field_validator
 from pypdf.errors import PdfReadError
 
+from app.agent.graph import run_agent
 from app.core.config import settings
 from app.generation.answer_generator import generate_rag_answer
 from app.ingestion.pdf_processor import extract_pdf_chunks
@@ -16,6 +17,7 @@ from app.retrieval.vector_store import add_chunks, search_chunks
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["RAG"])
+agent_router = APIRouter(prefix="/api/agent", tags=["Agentic AI"])
 
 
 class QueryRequest(BaseModel):
@@ -135,4 +137,30 @@ def query_documents(request: QueryRequest) -> dict:
         raise HTTPException(
             status_code=500,
             detail="Document query failed due to an internal server error.",
+        ) from exc
+
+
+@agent_router.post("/query")
+def query_with_agent(request: QueryRequest) -> dict:
+    """Run the LangGraph agent, which chooses whether to call document retrieval."""
+    try:
+        result = run_agent(request.question, request.top_k)
+        return {
+            "question": request.question,
+            **result,
+        }
+    except APIError as exc:
+        logger.exception("Gemini API failed during agent execution.")
+        raise HTTPException(
+            status_code=502,
+            detail="The AI provider failed during agent execution. Check Gemini model, API access, and quota.",
+        ) from exc
+    except RuntimeError as exc:
+        logger.exception("AI service configuration error during agent execution.")
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:
+        logger.exception("Unexpected agent execution failure.")
+        raise HTTPException(
+            status_code=500,
+            detail="Agent execution failed due to an internal server error.",
         ) from exc
