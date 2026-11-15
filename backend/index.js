@@ -4,6 +4,7 @@ import connectDB from './config/conn.js';
 import User from './routes/userRoutes.js';
 import Builder from "./routes/builderRoutes.js"
 import Assistant from "./routes/assistantRoutes.js"
+import Ai from "./routes/aiRoutes.js"
 
 import cors from 'cors';
 
@@ -33,6 +34,7 @@ app.use(cors({
 app.use('/auth', User);
 app.use('/builder', Builder);
 app.use('/assistant', Assistant);
+app.use('/ai', Ai);
 
 
 app.get('/', (req, res) => {
