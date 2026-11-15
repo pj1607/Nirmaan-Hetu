@@ -5,12 +5,19 @@ def generate_rag_answer(question: str, retrieved_chunks: list[dict]) -> str:
     if not retrieved_chunks:
         return "I could not find sufficiently relevant information in the uploaded documents."
 
-    context_parts = []
-    for index, item in enumerate(retrieved_chunks, start=1):
+    # Several retrieved chunks can come from the same PDF page. Group them so
+    # the model sees one citation label per unique document/page combination.
+    grouped_context: dict[tuple[str, int], list[str]] = {}
+    for item in retrieved_chunks:
         metadata = item["metadata"]
+        key = (metadata["source"], metadata["page"])
+        grouped_context.setdefault(key, []).append(item["text"])
+
+    context_parts = []
+    for index, ((source, page), texts) in enumerate(grouped_context.items(), start=1):
         context_parts.append(
-            f"[Source {index}: {metadata['source']}, page {metadata['page']}]\n"
-            f"{item['text']}"
+            f"[Source {index}: {source}, page {page}]\n"
+            + "\n\n".join(texts)
         )
 
     context = "\n\n".join(context_parts)
@@ -29,7 +36,8 @@ source material for answering the user's question.
 Cite every factual claim using only the source labels supplied in the context,
 in this exact format: [Source N: filename, page X]. Never invent a filename,
 page number, or source label. If multiple sources support a claim, cite each
-relevant source.
+relevant source. Reuse a source label when multiple claims rely on the same
+document page; do not repeat the same citation unnecessarily.
 
 Question:
 {question}
