@@ -52,15 +52,20 @@ def _retrieve_documents(state: AgentState) -> dict:
 def _answer_from_documents(state: AgentState) -> dict:
     chunks = state.get("retrieved_chunks", [])
     answer = generate_rag_answer(state["question"], chunks)
-    sources = [
-        {
-            "document_id": item["metadata"].get("document_id"),
-            "source": item["metadata"]["source"],
-            "page": item["metadata"]["page"],
-            "distance": item["distance"],
-        }
-        for item in chunks
-    ]
+    # Multiple retrieved chunks may belong to the same PDF page. Return one
+    # source entry per unique document/page so the frontend avoids duplicates.
+    sources_by_page = {}
+    for item in chunks:
+        metadata = item["metadata"]
+        key = (metadata.get("document_id"), metadata["source"], metadata["page"])
+        if key not in sources_by_page:
+            sources_by_page[key] = {
+                "document_id": metadata.get("document_id"),
+                "source": metadata["source"],
+                "page": metadata["page"],
+                "distance": item["distance"],
+            }
+    sources = list(sources_by_page.values())
     return {
         "answer": answer,
         "sources": sources,
