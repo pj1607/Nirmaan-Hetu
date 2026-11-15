@@ -15,7 +15,8 @@ import PersonIcon from "@mui/icons-material/Person";
 import { useAnimation, motion } from "framer-motion";
 import axios from "axios";
 
-const API = import.meta.env.VITE_API_URL;
+const AI_API =
+  import.meta.env.VITE_AI_SERVICE_URL || "http://127.0.0.1:8000";
 
 // Slide-in transition from right
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -58,7 +59,7 @@ const TypingLoader = () => (
   </Box>
 );
 
-const AiDesignAssistantModal = ({ open, handleClose, userId }) => {
+const AiDesignAssistantModal = ({ open, handleClose }) => {
   const [messages, setMessages] = useState([
     {
       sender: "assistant",
@@ -69,8 +70,6 @@ const AiDesignAssistantModal = ({ open, handleClose, userId }) => {
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef(null);
-  const [fromMic, setFromMic] = useState(false);
-  const [lastLang, setLastLang] = useState("en"); // <- store lang from backend
 
   const micControls = useAnimation();
 
@@ -94,9 +93,8 @@ const AiDesignAssistantModal = ({ open, handleClose, userId }) => {
         transition: { duration: 0.2 },
       });
     }
-  }, [listening]);
+  }, [listening, micControls]);
 
-  // refs
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -108,86 +106,89 @@ const AiDesignAssistantModal = ({ open, handleClose, userId }) => {
     scrollToBottom();
   }, [messages, loading]);
 
-  // ---- Unlock Speech on iOS (must run once after first user tap) ----
+  // Unlock speech synthesis after a user interaction (needed by some browsers).
   const initSpeech = () => {
     if (!window.speechSynthesis) return;
-    const dummy = new SpeechSynthesisUtterance("");
-    window.speechSynthesis.speak(dummy);
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance(""));
   };
 
-  // ---- Get Voices with Retry (handles iOS empty voices bug) ----
   const getVoices = () =>
     new Promise((resolve) => {
-      let voices = window.speechSynthesis.getVoices();
-      if (voices.length) return resolve(voices);
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length) {
+        resolve(voices);
+        return;
+      }
 
       window.speechSynthesis.onvoiceschanged = () => {
-        voices = window.speechSynthesis.getVoices();
-        resolve(voices);
+        resolve(window.speechSynthesis.getVoices());
       };
     });
 
-  // ---- Speak Function (Desktop + iOS safe) ----
   const speak = async (text, lang) => {
     if (!window.speechSynthesis) return;
 
     const isHindi = lang === "hi";
     const voices = await getVoices();
-
     const preferredVoices = isHindi
       ? ["Google हिन्दी", "com.apple.ttsbundle.sangeeta-compact"]
-      : [
-          "Google US English",
-        "Siri Female (en-US)", "Siri Male (en-US)"
-        ];
+      : ["Google US English", "Siri Female (en-US)", "Siri Male (en-US)"];
 
-    let voice = voices.find((v) => preferredVoices.includes(v.name));
+    let voice = voices.find((item) => preferredVoices.includes(item.name));
     if (!voice) {
       voice =
-        voices.find((v) =>
-          v.lang.toLowerCase().includes(isHindi ? "hi" : "en")
+        voices.find((item) =>
+          item.lang.toLowerCase().includes(isHindi ? "hi" : "en")
         ) || voices[0];
     }
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.voice = voice;
     utterance.lang = isHindi ? "hi-IN" : "en-US";
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
+    utterance.rate = 1;
+    utterance.pitch = 1;
     utterance.volume = 1;
 
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
   };
 
-  const sendMessage = async (overrideText) => {
-    const textToSend = overrideText || input;
-    if (!textToSend.trim()) return;
+  const sendMessage = async (overrideText, shouldSpeak = false) => {
+    const textToSend = (overrideText ?? input).trim();
+    if (!textToSend || loading) return;
 
-    const userMessage = { sender: "user", text: textToSend };
-    setMessages((prev) => [...prev, userMessage]);
+    setMessages((prev) => [...prev, { sender: "user", text: textToSend }]);
     setInput("");
     setLoading(true);
 
     try {
-      const res = await axios.post(`${API}/assistant`, {
-        userId,
-        message: textToSend,
+      const res = await axios.post(`${AI_API}/api/agent/query`, {
+        question: textToSend,
+        top_k: 4,
       });
-      const botMessage = { sender: "assistant", text: res.data.reply };
-      setMessages((prev) => [...prev, botMessage]);
 
-      setLastLang(res.data.lang);
+      const answer = res.data.answer || "I couldn't generate an answer.";
+      const sources = Array.isArray(res.data.sources) ? res.data.sources : [];
 
-      if (fromMic) {
-        speak(res.data.reply, res.data.lang); 
-        setFromMic(false);
-      }
-    } catch (err) {
-      console.error(err);
       setMessages((prev) => [
         ...prev,
-        { sender: "assistant", text: "Oops! Something went wrong." },
+        { sender: "assistant", text: answer, sources },
+      ]);
+
+      // The agent responds in the language of the question; use the matching
+      // browser speech voice when the user submitted a Hindi-script question.
+      const responseLang = /[\\u0900-\\u097F]/.test(textToSend) ? "hi" : "en";
+      if (shouldSpeak) {
+        speak(answer, responseLang);
+      }
+    } catch (err) {
+      console.error("Agentic AI request failed:", err);
+      const message =
+        err.response?.data?.detail ||
+        "I couldn't connect to the AI assistant. Please check that the AI service is running and try again.";
+      setMessages((prev) => [
+        ...prev,
+        { sender: "assistant", text: message },
       ]);
     } finally {
       setLoading(false);
@@ -195,8 +196,11 @@ const AiDesignAssistantModal = ({ open, handleClose, userId }) => {
     }
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") sendMessage();
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      sendMessage();
+    }
   };
 
   // Speech-to-Text (Mic Input)
@@ -226,8 +230,7 @@ const AiDesignAssistantModal = ({ open, handleClose, userId }) => {
     recognition.onresult = (event) => {
       const spokenText = event.results[0][0].transcript;
       setInput(spokenText);
-      setFromMic(true);
-      sendMessage(spokenText);
+      sendMessage(spokenText, true);
     };
 
     recognition.start();
@@ -278,6 +281,12 @@ const AiDesignAssistantModal = ({ open, handleClose, userId }) => {
       >
         <Stack direction="row" spacing={1} alignItems="center">
           <Avatar sx={{ bgcolor: "#333", fontWeight: "bold" }}>N</Avatar>
+          <Box>
+            <Box sx={{ fontWeight: 600 }}>Nirmaan AI</Box>
+            <Box sx={{ color: "#aaa", fontSize: 12 }}>
+              RAG-powered construction assistant
+            </Box>
+          </Box>
         </Stack>
         <IconButton onClick={handleClose} sx={{ color: "#fff" }}>
           <CloseIcon />
@@ -325,6 +334,24 @@ const AiDesignAssistantModal = ({ open, handleClose, userId }) => {
               }}
             >
               {msg.text}
+              {msg.sources?.length > 0 && (
+                <Stack spacing={0.5} sx={{ mt: 1.2 }}>
+                  {msg.sources.map((source, sourceIndex) => (
+                    <Box
+                      key={`${source.document_id || source.source}-${source.page}-${sourceIndex}`}
+                      sx={{
+                        color: "#ffbd9f",
+                        fontSize: 11,
+                        borderTop: "1px solid rgba(255,255,255,0.12)",
+                        pt: 0.5,
+                      }}
+                    >
+                      Source: {source.source || "Uploaded document"} · Page{" "}
+                      {source.page}
+                    </Box>
+                  ))}
+                </Stack>
+              )}
             </Box>
             {msg.sender === "user" && (
               <Avatar sx={{ bgcolor: "#FF7A5A", fontSize: 14 }}>
@@ -352,12 +379,12 @@ const AiDesignAssistantModal = ({ open, handleClose, userId }) => {
           fullWidth
           size="small"
           variant="outlined"
-          placeholder="Your text here..."
+          placeholder="Ask about construction or your uploaded documents..."
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(event) => setInput(event.target.value)}
           onKeyPress={handleKeyPress}
           inputRef={inputRef}
-          disabled={false}
+          disabled={loading}
           sx={{
             "& .MuiOutlinedInput-root": {
               borderRadius: "20px",
@@ -380,6 +407,7 @@ const AiDesignAssistantModal = ({ open, handleClose, userId }) => {
         {/* Mic Button */}
         <IconButton
           onClick={toggleListening}
+          disabled={loading}
           component={motion.button}
           animate={micControls}
           whileTap={{ scale: 1.2, rotate: 15 }}
@@ -407,6 +435,7 @@ const AiDesignAssistantModal = ({ open, handleClose, userId }) => {
         {/* Send Button */}
         <IconButton
           onClick={() => sendMessage()}
+          disabled={loading || !input.trim()}
           component={motion.button}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
